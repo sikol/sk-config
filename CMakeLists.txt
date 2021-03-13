@@ -26,6 +26,8 @@
 
 cmake_minimum_required(VERSION 3.12)
 
+set(VCPKG_FEATURE_FLAGS, "registries")
+
 enable_testing()
 
 project(sk-config VERSION 1.0.0 LANGUAGES CXX)

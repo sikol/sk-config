@@ -3,7 +3,6 @@
   "name": "sk-config",
   "version-string": "1.0.0",
   "dependencies": [
-    "sk-value",
     "catch2",
     "boost-spirit"
   ]
