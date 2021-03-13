@@ -35,8 +35,6 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 
-#include <sk/value.hxx>
-
 namespace sk::config {
 
     // A location in the configuration file.
@@ -63,6 +61,6 @@ namespace sk::config {
 
 } // namespace sk::config
 
-BOOST_FUSION_ADAPT_STRUCT(sk::config::location, line, column)
+BOOST_FUSION_ADAPT_STRUCT(sk::config::location, line, column);
 
 #endif // SK_CONFIG_CONFIG_LOCATION_HXX_INCLUDED

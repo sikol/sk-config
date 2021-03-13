@@ -1,10 +1,10 @@
 ﻿{
   "configurations": [
     {
-      "name": "x64-Debug",
-      "generator": "Ninja",
+      "name": "x64-msvc-debug",
       "configurationType": "Debug",
       "inheritEnvironments": [ "msvc_x64_x64" ],
+      "generator": "Ninja",
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
@@ -22,6 +22,52 @@
           "value": "registries",
           "type": "STRING"
         }
+      ]
+    },
+    {
+      "name": "x64-clang-debug",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "clang_cl_x64" ],
+      "generator": "Ninja",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "variables": [
+        {
+          "name": "SK_CONFIG_BUILD_TESTS",
+          "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "VCPKG_FEATURE_FLAGS",
+          "value": "registries",
+          "type": "STRING"
+        }/*,
+        {
+          "name": "CMAKE_CXX_COMPILER",
+          "value": "$ENV{VCINSTALLDIR}Tools\\Llvm\\bin\\clang-cl.exe",
+          //"value": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Preview/VC/Tools/Llvm/bin/clang-cl.exe",
+          "type": "PATH"
+        },
+        {
+          "name": "CMAKE_C_COMPILER",
+          "value": "$ENV{VCINSTALLDIR}Tools\\Llvm\\bin\\clang-cl.exe",
+          //"value": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Preview/VC/Tools/Llvm/bin/clang-cl.exe",
+          "type": "PATH"
+        },
+        {
+          "name": "CMAKE_C_FLAGS",
+          "value": "/RTC1 /Od /Zi /MDd",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_CXX_FLAGS",
+          "value": "/RTC1 /Od /Zi /MDd /EHsc",
+          "type": "STRING"
+        }*/
       ]
     }
   ]

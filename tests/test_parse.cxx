@@ -200,7 +200,7 @@ TEST_CASE("basic config") {
 
     auto grammar = cr::config<test_config>(
         cr::option("other-int-value", &test_config::other_int_value),
-        cr::block("test-block", &test_config::b,
+        cr::block<test_block>("test-block", &test_config::b,
                   cr::option("string-value", &test_block::string_value),
                   cr::option("int-value", &test_block::int_value),
                   cr::option("bool-value", &test_block::bool_value)));
@@ -231,7 +231,10 @@ TEST_CASE("vector of items") {
     auto grammar =
         cr::config<test_config>(cr::option("int-value", &test_config::items));
     auto c = sk::config::parse(R"(
-int-value 1, 42, 666;
+#int-value 1, 42, 666;
+int-value 1;
+int-value 42;
+int-value 666;
 )",
                                 grammar);
 
@@ -239,4 +242,36 @@ int-value 1, 42, 666;
     REQUIRE(c.items[0] == 1);
     REQUIRE(c.items[1] == 42);
     REQUIRE(c.items[2] == 666);
+}
+
+TEST_CASE("named block") {
+    namespace cr = sk::config::parser;
+
+    struct int_config {
+        std::string name;
+        int value;
+    };
+
+    struct test_config {
+        std::vector<int_config> ints;
+    };
+
+    auto grammar = cr::config<test_config>(  //
+        cr::block<int_config>("int", &int_config::name, &test_config::ints, //
+                  cr::option("value", &int_config::value)));
+
+    auto c = sk::config::parse(R"(
+int "one" {
+    value 1;
+};
+int "answer" {
+    value 42;
+};
+)",
+                               grammar);
+
+    REQUIRE(c.ints[0].name == "one");
+    REQUIRE(c.ints[0].value == 1);
+    REQUIRE(c.ints[1].name == "answer");
+    REQUIRE(c.ints[1].value == 42);
 }

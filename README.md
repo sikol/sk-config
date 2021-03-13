@@ -34,6 +34,7 @@ A parser can be created like this:
 #include <boost/spirit/include/support_istream_iterator.hpp>
 
 struct user {
+	std::string name;
 	std::string password;
 };
 
@@ -54,10 +55,10 @@ int main(int argc, char **argv) {
 
 	auto grammar = cp::config<config>(
 
-		cr::block("user", &config::users,
+		cr::block<user>("user", &user::name, &config::users,
 			cr::option("password", &user::password)),
 
-		cr::block("access", &config::access,
+		cr::block<access_config>("access", &config::access,
 			cr::option("allow", &access_config::allow_users))
 	);
 

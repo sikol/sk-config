@@ -32,7 +32,39 @@
 #include <boost/spirit/home/x3.hpp>
 
 namespace sk::config::detail {
+    template <typename T, typename V> struct propagate {
+        V(T::*member);
 
+        propagate(V(T::*member_)) : member(member_) {}
+
+        template <typename To, typename From> void impl(To &to, From &from) {
+            to = std::move(from);
+        }
+
+        template <typename U>
+        void impl(std::vector<U> &to, std::vector<U> &from) {
+            std::move(from.begin(), from.end(), std::back_inserter(to));
+            from.clear();
+            // to.push_back(from);
+        }
+
+        template <typename U, typename From>
+        void impl(std::vector<U> &to, From &from) {
+            to.push_back(from);
+        }
+
+        template <typename Context> void operator()(Context &ctx) {
+            namespace x3 = boost::spirit::x3;
+
+            impl(x3::_val(ctx).*member, x3::_attr(ctx));
+#if 0
+
+            x3::traits::move_to(x3::_attr(ctx), x3::_val(ctx).*member);
+#endif
+        }
+    };
+
+#if 0
     template<typename T, typename V>
     auto propagate(V (T::*member)) {
         namespace x3 = boost::spirit::x3;
@@ -41,7 +73,7 @@ namespace sk::config::detail {
             x3::traits::move_to(x3::_attr(ctx), x3::_val(ctx).*member);
         };
     }
-    #if 0
+
     template<typename T, typename V>
     auto propagate(std::vector<V>(T::*member)) {
         namespace x3 = boost::spirit::x3;
@@ -50,7 +82,7 @@ namespace sk::config::detail {
             (x3::_val(ctx).*member).push_back(x3::_attr(ctx));
         };
     }
-    #endif
+#endif
 
 } // namespace sk::config::detail
 

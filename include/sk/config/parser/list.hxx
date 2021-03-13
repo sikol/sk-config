@@ -36,8 +36,7 @@
 namespace sk::config::parser {
 
     template <typename T>
-    struct list_parser
-        : boost::spirit::x3::parser<list_parser<T>> {
+    struct list_parser : boost::spirit::x3::parser<list_parser<T>> {
         typedef std::vector<typename T::attribute_type> attribute_type;
         static bool const has_attribute = true;
 
@@ -51,7 +50,7 @@ namespace sk::config::parser {
             static auto const grammar = parser % ',';
             return grammar.parse(first, last, context, x3::unused, attr);
         }
-
+#if 0
         template <typename Iterator, typename Context, typename Attribute>
         bool parse(Iterator &first, Iterator const &last,
                    Context const &context, boost::spirit::x3::unused_type,
@@ -63,6 +62,7 @@ namespace sk::config::parser {
             }
             return false;
         }
+#endif
     };
 
 } // namespace sk::config::parser

@@ -42,7 +42,7 @@
 namespace sk::config::detail {
 
     template <typename T> struct parser_for {
-        using parser = void;
+        // using parser = void;
     };
 
     template <typename T> struct parser_for<std::vector<T>> {
@@ -109,21 +109,21 @@ namespace sk::config::detail {
                                            config_real_policies<long double>>;
     };
 
-#if 0
     template <typename T, typename V>
-    auto make_member_parser(std::vector<V>(T::*const member)) {
+    auto make_member_parser(V(T::*const member)) {
+        namespace x3 = boost::spirit::x3;
+        static typename parser_for<V>::parser parser;
+        return parser[propagate(member)];
+    }
+
+#if 0
+    template < typename T, typename V>
+    auto make_member_parser(std::vector<V> (T::*const member)) {
         namespace x3 = boost::spirit::x3;
         static typename parser_for<V>::parser parser;
         return parser[propagate(member)];
     }
 #endif
-
-    template <typename T, typename V>
-    auto make_member_parser(V(T::*const member)) {
-        namespace x3 = boost::spirit::x3;
-        static parser_for<V>::parser parser;
-        return parser[propagate(member)];
-    }
 
 } // namespace sk::config::detail
 

@@ -68,7 +68,7 @@ namespace sk::config::parser {
      * block(label, members...): parse a block with the given label which
      * contains the members.
      */
-    template <typename T, typename V, typename... Members>
+    template <typename U, typename T, typename V, typename... Members>
     auto block(auto label, V(T::*mm), Members &&...members) {
         namespace x3 = boost::spirit::x3;
 
@@ -77,7 +77,20 @@ namespace sk::config::parser {
         auto do_nothing = [&](auto &ctx) {};
         auto parser = x3::as_parser(label) >> '{' >>
                       member_parser[do_nothing] >> '}' >> ';';
-        return rule<V>(label, parser)[detail::propagate(mm)];
+        return rule<U>(label, parser)[detail::propagate(mm)];
+    }
+
+    template <typename U, typename W, typename T, typename V,
+              typename... Members>
+    auto block(auto label, W(U::*name), V(T::*mm), Members &&...members) {
+        namespace x3 = boost::spirit::x3;
+
+        auto member_parser = *(... | std::forward<Members>(members));
+
+        auto do_nothing = [&](auto &ctx) {};
+        auto parser = x3::as_parser(label) >> detail::make_member_parser(name) >> '{' >>
+                      member_parser[do_nothing] >> '}' >> ';';
+        return rule<U>(label, parser)[detail::propagate(mm)];
     }
 
     /*
