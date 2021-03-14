@@ -26,41 +26,56 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_CONFIG_LOCATION_HXX_INCLUDED
-#define SK_CONFIG_CONFIG_LOCATION_HXX_INCLUDED
+#ifndef SK_CONFIG_ERROR_DETAIL_HXX_INCLUDED
+#define SK_CONFIG_ERROR_DETAIL_HXX_INCLUDED
 
-#include <cstdlib>
+#include <cstddef>
+#include <iostream>
 #include <string>
-
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/fusion/include/std_pair.hpp>
 
 namespace sk::config {
 
-    // A location in the configuration file.
-    struct location {
-        location() : line(0), column(0) {}
+    /*
+     * error_detail: information about an error that occurred while parsing
+     * the configuration file.
+     */
+    struct error_detail {
+        // The name of the file the error occurred in, or empty if not known.
+        std::string file;
 
-        location(std::size_t l, std::size_t c) : line(l), column(c) {}
-
-        location(location const &) = default;
-        location(location &&) = default;
-        location &operator=(location const &) = default;
-        location &operator=(location &&) = default;
-
-        template <typename Iterator>
-        location(Iterator begin, Iterator current)
-            : line(get_line(current)), column(get_column(begin, current))
-        //, line_text(get_current_line(begin, current))
-        {}
-
+        // The line number the error occurred on.
         std::size_t line;
+
+        // The column the error starts on.
         std::size_t column;
-        //        std::string line_text;
+
+        // Contents of the line the error occurred on.
+        std::string context;
+
+        // Text of the error message.
+        std::string message;
     };
+
+    inline auto operator<<(std::ostream &strm, error_detail const &err)
+        -> std::ostream & {
+        if (!err.file.empty())
+            strm << "in " << err.file << ", ";
+
+        strm << "line " << err.line << ": ";
+        strm << err.message << '\n';
+
+        // Print the context but convert tabs to a single space, so that
+        // the error marker lines up.
+        strm << "      ";
+        for (auto &&c : err.context)
+            strm << (c == '\t' ? ' ' : c);
+        strm << '\n';
+
+        strm << "here -" << std::string(err.column, '-') << "^\n";
+
+        return strm;
+    }
 
 } // namespace sk::config
 
-BOOST_FUSION_ADAPT_STRUCT(sk::config::location, line, column);
-
-#endif // SK_CONFIG_CONFIG_LOCATION_HXX_INCLUDED
+#endif // SK_CONFIG_ERROR_DETAIL_HXX_INCLUDED

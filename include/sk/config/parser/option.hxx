@@ -32,17 +32,21 @@
 #include <string>
 
 #include <boost/spirit/home/x3.hpp>
+#include <boost/spirit/home/x3/support/utility/error_reporting.hpp>
 
 #include <sk/config/detail/make_member_parser.hxx>
 #include <sk/config/detail/propagate.hxx>
 #include <sk/config/parser/identifier.hxx>
 #include <sk/config/parser/qstring.hxx>
+#include <sk/config/error.hxx>
 
 namespace sk::config::parser {
 
+    struct rule_tag : parser_error_handler {};
+
     template <typename T, typename P> auto rule(const char *debug, P p) {
         namespace x3 = boost::spirit::x3;
-        return x3::rule<struct _, T>{debug} = p;
+        return x3::rule<rule_tag, T>{debug} = p;
     };
 
     /*
@@ -50,16 +54,16 @@ namespace sk::config::parser {
      * a string, although it doesn't have to be) and place the value in
      * 'member', which must be a pointer to member.
      */
-    template <typename T, typename V> auto option(auto label, V(T::*member)) {
+    template <typename T, typename V> auto option(auto label, V T::*member) {
         namespace x3 = boost::spirit::x3;
 
         if constexpr (std::same_as<bool, V>) {
             // bool is special because it doesn't have a value.
             auto set_bool = [=](auto &ctx) { x3::_val(ctx).*member = true; };
-            auto parser = x3::as_parser(label) >> ';';
+            auto parser = x3::as_parser(label) > ';';
             return parser[set_bool];
         } else {
-            return x3::as_parser(label) >> detail::make_member_parser(member) >>
+            return x3::as_parser(label) > detail::make_member_parser(member) >
                    ';';
         }
     };
@@ -69,27 +73,27 @@ namespace sk::config::parser {
      * contains the members.
      */
     template <typename U, typename T, typename V, typename... Members>
-    auto block(auto label, V(T::*mm), Members &&...members) {
+    auto block(auto label, V T::*mm, Members &&...members) {
         namespace x3 = boost::spirit::x3;
 
         auto member_parser = *(... | std::forward<Members>(members));
 
-        auto do_nothing = [&](auto &ctx) {};
-        auto parser = x3::as_parser(label) >> '{' >>
-                      member_parser[do_nothing] >> '}' >> ';';
+        auto do_nothing = [&](auto &) {};
+        auto parser = x3::as_parser(label) >> ('{' >
+                      member_parser[do_nothing] > '}') > ';';
         return rule<U>(label, parser)[detail::propagate(mm)];
     }
 
     template <typename U, typename W, typename T, typename V,
               typename... Members>
-    auto block(auto label, W(U::*name), V(T::*mm), Members &&...members) {
+    auto block(auto label, W U::*name, V T::*mm, Members &&...members) {
         namespace x3 = boost::spirit::x3;
 
         auto member_parser = *(... | std::forward<Members>(members));
 
-        auto do_nothing = [&](auto &ctx) {};
-        auto parser = x3::as_parser(label) >> detail::make_member_parser(name) >> '{' >>
-                      member_parser[do_nothing] >> '}' >> ';';
+        auto do_nothing = [&](auto &) {};
+        auto parser = x3::as_parser(label) >> detail::make_member_parser(name) >> ('{' >
+                      member_parser[do_nothing] > '}') > ';';
         return rule<U>(label, parser)[detail::propagate(mm)];
     }
 
@@ -104,8 +108,9 @@ namespace sk::config::parser {
 
         auto member_parser = *(... | std::forward<Members>(members));
 
-        auto do_nothing = [&](auto &ctx) {};
+        auto do_nothing = [&](auto &) {};
         auto parser = member_parser[do_nothing];
+        //> x3::eoi;
         return rule<T>("config", parser);
     }
 

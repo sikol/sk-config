@@ -34,6 +34,7 @@
 #include <boost/spirit/home/x3.hpp>
 
 #include <sk/config/detail/propagate.hxx>
+#include <sk/config/error.hxx>
 #include <sk/config/parser/any_string.hxx>
 #include <sk/config/parser/identifier.hxx>
 #include <sk/config/parser/list.hxx>
@@ -47,46 +48,57 @@ namespace sk::config::detail {
 
     template <typename T> struct parser_for<std::vector<T>> {
         using parser = parser::list_parser<typename parser_for<T>::parser>;
+        static constexpr char const name[] = "a list of values";
     };
 
     template <> struct parser_for<std::string> {
         using parser = parser::any_string_parser<char>;
+        static constexpr char const name[] = "a string";
     };
 
     template <> struct parser_for<std::wstring> {
         using parser = parser::any_string_parser<wchar_t>;
+        static constexpr char const name[] = "a string";
     };
 
     template <> struct parser_for<short> {
         using parser = boost::spirit::x3::int_parser<short>;
+        static constexpr char const name[] = "an integer";
     };
 
     template <> struct parser_for<unsigned short> {
         using parser = boost::spirit::x3::int_parser<unsigned short>;
+        static constexpr char const name[] = "a positive integer";
     };
 
     template <> struct parser_for<unsigned int> {
         using parser = boost::spirit::x3::int_parser<unsigned int>;
+        static constexpr char const name[] = "a positive integer";
     };
 
     template <> struct parser_for<int> {
         using parser = boost::spirit::x3::int_parser<int>;
+        static constexpr char const name[] = "an integer";
     };
 
     template <> struct parser_for<long> {
         using parser = boost::spirit::x3::int_parser<long>;
+        static constexpr char const name[] = "an integer";
     };
 
     template <> struct parser_for<unsigned long> {
         using parser = boost::spirit::x3::int_parser<unsigned long>;
+        static constexpr char const name[] = "a positive integer";
     };
 
     template <> struct parser_for<long long> {
         using parser = boost::spirit::x3::int_parser<long long>;
+        static constexpr char const name[] = "an integer";
     };
 
     template <> struct parser_for<unsigned long long> {
         using parser = boost::spirit::x3::int_parser<unsigned long long>;
+        static constexpr char const name[] = "a positive integer";
     };
 
     template <typename T>
@@ -95,35 +107,39 @@ namespace sk::config::detail {
     template <> struct parser_for<float> {
         using parser =
             boost::spirit::x3::real_parser<float, config_real_policies<float>>;
+        static constexpr char const name[] = "a decimal number";
     };
 
     template <> struct parser_for<double> {
         using parser =
             boost::spirit::x3::real_parser<double,
                                            config_real_policies<double>>;
+        static constexpr char const name[] = "a decimal number";
     };
 
     template <> struct parser_for<long double> {
         using parser =
             boost::spirit::x3::real_parser<long double,
                                            config_real_policies<long double>>;
+        static constexpr char const name[] = "a decimal number";
+    };
+
+    struct member_tag : parser_error_handler {};
+
+    template <typename T, typename P> auto member_rule(const char *debug, P p) {
+        namespace x3 = boost::spirit::x3;
+        return x3::rule<member_tag, T>{debug} = p;
     };
 
     template <typename T, typename V>
-    auto make_member_parser(V(T::*const member)) {
+    auto make_member_parser(V T::*const member) {
         namespace x3 = boost::spirit::x3;
-        static typename parser_for<V>::parser parser;
-        return parser[propagate(member)];
-    }
 
-#if 0
-    template < typename T, typename V>
-    auto make_member_parser(std::vector<V> (T::*const member)) {
-        namespace x3 = boost::spirit::x3;
         static typename parser_for<V>::parser parser;
-        return parser[propagate(member)];
+        static auto rule = member_rule<V>(parser_for<V>::name, parser);
+
+        return x3::expect[rule][propagate(member)];
     }
-#endif
 
 } // namespace sk::config::detail
 

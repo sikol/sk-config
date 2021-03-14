@@ -45,29 +45,17 @@
           "name": "VCPKG_FEATURE_FLAGS",
           "value": "registries",
           "type": "STRING"
-        }/*,
-        {
-          "name": "CMAKE_CXX_COMPILER",
-          "value": "$ENV{VCINSTALLDIR}Tools\\Llvm\\bin\\clang-cl.exe",
-          //"value": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Preview/VC/Tools/Llvm/bin/clang-cl.exe",
-          "type": "PATH"
-        },
-        {
-          "name": "CMAKE_C_COMPILER",
-          "value": "$ENV{VCINSTALLDIR}Tools\\Llvm\\bin\\clang-cl.exe",
-          //"value": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Preview/VC/Tools/Llvm/bin/clang-cl.exe",
-          "type": "PATH"
         },
         {
           "name": "CMAKE_C_FLAGS",
-          "value": "/RTC1 /Od /Zi /MDd",
+          "value": "-m64 -fdiagnostics-absolute-paths /RTC1 /Od /Zi /MDd /Wall",
           "type": "STRING"
         },
         {
           "name": "CMAKE_CXX_FLAGS",
-          "value": "/RTC1 /Od /Zi /MDd /EHsc",
+          "value": "-m64 -fdiagnostics-absolute-paths /RTC1 /Od /Zi /MDd /EHsc /Wall -Wno-reserved-id-macro -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-disabled-macro-expansion ",
           "type": "STRING"
-        }*/
+        }
       ]
     }
   ]

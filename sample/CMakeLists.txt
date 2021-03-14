@@ -26,39 +26,5 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-set(VCPKG_FEATURE_FLAGS, "registries")
-
-enable_testing()
-
-project(sk-config VERSION 1.0.0 LANGUAGES CXX)
-
-option(SK_CONFIG_BUILD_TESTS "Build and run the tests for sk::config (requires Catch2)")
-
-if(SK_CONFIG_BUILD_TESTS)
-	find_package(Catch2 CONFIG REQUIRED)
-	find_package(Boost REQUIRED)
-	find_package(fmt REQUIRED)
-	add_subdirectory(tests)
-	add_subdirectory(sample)
-endif()
-
-add_library(sk-config INTERFACE)
-
-target_sources(sk-config PRIVATE 
-	include/sk/config/parse.hxx
-	include/sk/config/error.hxx
-	
-	include/sk/config/parser/qstring.hxx
-	include/sk/config/parser/identifier.hxx
-	include/sk/config/parser/any_string.hxx
-	include/sk/config/parser/comment.hxx
-	include/sk/config/parser/option.hxx
-	include/sk/config/detail/propagate.hxx
-	include/sk/config/detail/make_member_parser.hxx
-	include/sk/config/parser/list.hxx
- "include/sk/config/detail/error_formatter.hxx" "include/sk/config/error_detail.hxx")
-
-target_include_directories(sk-config INTERFACE include)
-target_compile_features(sk-config INTERFACE cxx_std_20)
-
-install(DIRECTORY "include/sk" TYPE INCLUDE)
+add_executable(sample_parser main.cxx) 
+target_link_libraries(sample_parser PRIVATE sk-config fmt::fmt Boost::headers)

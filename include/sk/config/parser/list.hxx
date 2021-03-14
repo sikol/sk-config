@@ -50,19 +50,6 @@ namespace sk::config::parser {
             static auto const grammar = parser % ',';
             return grammar.parse(first, last, context, x3::unused, attr);
         }
-#if 0
-        template <typename Iterator, typename Context, typename Attribute>
-        bool parse(Iterator &first, Iterator const &last,
-                   Context const &context, boost::spirit::x3::unused_type,
-                   Attribute &attr_param) const {
-            attribute_type attr_;
-            if (parse(first, last, context, boost::spirit::x3::unused, attr_)) {
-                boost::spirit::x3::traits::move_to(attr_, attr_param);
-                return true;
-            }
-            return false;
-        }
-#endif
     };
 
 } // namespace sk::config::parser

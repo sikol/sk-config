@@ -29,35 +29,55 @@
 #ifndef SK_CONFIG_CONFIG_ERROR_HXX_INCLUDED
 #define SK_CONFIG_CONFIG_ERROR_HXX_INCLUDED
 
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
-#include <sk/config/location.hxx>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/spirit/home/x3/support/utility/error_reporting.hpp>
+
+#include <sk/config/error_detail.hxx>
 
 namespace sk::config {
+
+    struct parser_error_handler {
+        template <typename Iterator, typename Exception, typename Context>
+        boost::spirit::x3::error_handler_result
+        on_error(Iterator &first, Iterator const &last, Exception const &x,
+                 Context const &context) {
+            namespace x3 = boost::spirit::x3;
+
+            auto &error_handler = x3::get<x3::error_handler_tag>(context).get();
+            std::string message = "expected " + x.which();
+            error_handler(x.where(), message);
+            return x3::error_handler_result::fail;
+        }
+    };
 
     // A configuration error occured.
     struct error : std::runtime_error {
         error(std::string message) : std::runtime_error(std::move(message)) {}
     };
 
-    // A configuration error occured and can be located in input.
-    struct locatable_error : error {
-        locatable_error(location const &loc, std::string message)
-            : error(std::move(message)), _location(loc) {}
+    // An error occurred parsing the input.
+    struct parse_error : error {
+        std::vector<error_detail> errors;
 
-        auto get_location() const -> location {
-            return _location;
-        }
-
-      private:
-        config::location _location;
+        parse_error(std::string message, std::vector<error_detail> errors_)
+            : error(std::move(message)), errors(std::move(errors_)) {}
     };
 
-    // An error occurred parsing the input.
-    struct parse_error : locatable_error {
-        parse_error(location const &loc, std::string message)
-            : locatable_error(loc, std::move(message)) {}
+    inline auto operator<<(std::ostream &strm, parse_error const &p)
+        -> std::ostream & {
+
+        for (auto &&err : p.errors)
+            strm << err;
+        return strm;
+    }
+
+    // An error occurred doing file I/O.
+    struct file_error : error {
+        file_error(std::string message) : error(std::move(message)) {}
     };
 
 } // namespace sk::config

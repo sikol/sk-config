@@ -29,41 +29,52 @@
 #ifndef SK_CONFIG_CONFIG_PARSE_HXX
 #define SK_CONFIG_CONFIG_PARSE_HXX
 
+#include <iostream>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
+#include <type_traits>
 #include <variant>
 
 #include <boost/spirit/home/x3.hpp>
+#include <boost/spirit/home/x3/support/utility/error_reporting.hpp>
 
 #include <sk/config/error.hxx>
-#include <sk/config/location.hxx>
 #include <sk/config/parse.hxx>
 #include <sk/config/parser/comment.hxx>
 #include <sk/config/parser/identifier.hxx>
 #include <sk/config/parser/option.hxx>
 #include <sk/config/parser/qstring.hxx>
+#include <sk/config/error.hxx>
+#include <sk/config/detail/error_formatter.hxx>
 
 namespace sk::config {
 
     template <typename Iterator>
-    auto parse(Iterator first, Iterator last, auto const &grammar) {
+    auto parse(Iterator first, Iterator last, auto const &grammar, auto &ret) {
         namespace x3 = boost::spirit::x3;
 
-        typename std::remove_reference<decltype(grammar)>::type::attribute_type
-            ret;
-        bool r = x3::phrase_parse(first, last, grammar, parser::comment, ret);
+        std::vector<error_detail> errors;
+        auto error_handler =
+            detail::error_formatter(first, last, std::back_inserter(errors));
+
+        auto const grammar_ =
+            x3::with<x3::error_handler_tag>(std::ref(error_handler))[grammar];
+
+        bool r = x3::phrase_parse(first, last, grammar_, parser::comment, ret);
         if (r == false || (first != last))
-            throw error("could not parse the entire input");
-        return ret;
+            throw parse_error("could not parse the entire input", errors);
+        return true;
     }
 
-    auto parse(std::ranges::range auto const &r, auto const &grammar) {
-        return sk::config::parse(std::ranges::begin(r), std::ranges::end(r), grammar);
+    auto parse(std::ranges::range auto const &r, auto const &grammar,
+               auto &ret) {
+        return sk::config::parse(std::ranges::begin(r), std::ranges::end(r),
+                                 grammar, ret);
     }
 
-    auto parse(char const *s, auto const &grammar) {
-        return sk::config::parse(std::string_view(s), grammar);
+    auto parse(char const *s, auto const &grammar, auto &ret) {
+        return sk::config::parse(std::string_view(s), grammar, ret);
     }
 
 } // namespace sk::config

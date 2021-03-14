@@ -48,7 +48,8 @@ TEST_CASE("unsigned short value") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v 42;", grammar);
+    test_config c;
+    sk::config::parse("v 42;", grammar, c);
     REQUIRE(c.v == 42);
 }
 
@@ -60,7 +61,8 @@ TEST_CASE("short value") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v -42;", grammar);
+    test_config c;
+    sk::config::parse("v -42;", grammar, c);
     REQUIRE(c.v == -42);
 }
 
@@ -72,7 +74,8 @@ TEST_CASE("unsigned int value") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v 42;", grammar);
+    test_config c;
+    sk::config::parse("v 42;", grammar, c);
     REQUIRE(c.v == 42);
 }
 
@@ -84,7 +87,8 @@ TEST_CASE("int value") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v -42;", grammar);
+    test_config c;
+    sk::config::parse("v -42;", grammar, c);
     REQUIRE(c.v == -42);
 }
 
@@ -96,7 +100,8 @@ TEST_CASE("unsigned long value") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v 42;", grammar);
+    test_config c;
+    sk::config::parse("v 42;", grammar, c);
     REQUIRE(c.v == 42);
 }
 
@@ -108,7 +113,8 @@ TEST_CASE("long value") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v -42;", grammar);
+    test_config c;
+    sk::config::parse("v -42;", grammar, c);
     REQUIRE(c.v == -42);
 }
 
@@ -120,7 +126,8 @@ TEST_CASE("unsigned long long value") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v 42;", grammar);
+    test_config c;
+    sk::config::parse("v 42;", grammar, c);
     REQUIRE(c.v == 42);
 }
 
@@ -132,7 +139,8 @@ TEST_CASE("long long value") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v -42;", grammar);
+    test_config c;
+    sk::config::parse("v -42;", grammar, c);
     REQUIRE(c.v == -42);
 }
 
@@ -144,8 +152,9 @@ TEST_CASE("float value") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v 5.4;", grammar);
-    REQUIRE(c.v == 5.4f);
+    test_config c;
+    sk::config::parse("v 5.4;", grammar, c);
+    REQUIRE(c.v == Approx(5.4f));
 }
 
 TEST_CASE("double value") {
@@ -156,8 +165,9 @@ TEST_CASE("double value") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v 5.4;", grammar);
-    REQUIRE(c.v == 5.4);
+    test_config c;
+    sk::config::parse("v 5.4;", grammar, c);
+    REQUIRE(c.v == Approx(5.4));
 }
 
 TEST_CASE("long double value") {
@@ -168,8 +178,9 @@ TEST_CASE("long double value") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v 5.4;", grammar);
-    REQUIRE(c.v == 5.4);
+    test_config c;
+    sk::config::parse("v 5.4;", grammar, c);
+    REQUIRE(c.v == Approx(5.4));
 }
 
 TEST_CASE("double with int argument") {
@@ -180,8 +191,9 @@ TEST_CASE("double with int argument") {
     };
 
     auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    auto c = sk::config::parse("v 5;", grammar);
-    REQUIRE(c.v == 5);
+    test_config c;
+    sk::config::parse("v 5;", grammar, c);
+    REQUIRE(c.v == Approx(5));
 }
 
 TEST_CASE("basic config") {
@@ -205,7 +217,8 @@ TEST_CASE("basic config") {
                   cr::option("int-value", &test_block::int_value),
                   cr::option("bool-value", &test_block::bool_value)));
 
-    auto c = sk::config::parse(R"(
+    test_config c;
+    sk::config::parse(R"(
 other-int-value 666;
 test-block {
   string-value 'some string';
@@ -213,7 +226,7 @@ test-block {
   bool-value;
 };
 )",
-                                grammar);
+                                grammar, c);
 
     REQUIRE(c.other_int_value == 666);
     REQUIRE(c.b.int_value == 42);
@@ -230,13 +243,13 @@ TEST_CASE("vector of items") {
 
     auto grammar =
         cr::config<test_config>(cr::option("int-value", &test_config::items));
-    auto c = sk::config::parse(R"(
-#int-value 1, 42, 666;
-int-value 1;
-int-value 42;
+    test_config c;
+
+    sk::config::parse(R"(
+int-value 1, 42;
 int-value 666;
 )",
-                                grammar);
+                                grammar, c);
 
     REQUIRE(c.items.size() == 3);
     REQUIRE(c.items[0] == 1);
@@ -260,7 +273,8 @@ TEST_CASE("named block") {
         cr::block<int_config>("int", &int_config::name, &test_config::ints, //
                   cr::option("value", &int_config::value)));
 
-    auto c = sk::config::parse(R"(
+    test_config c;
+    sk::config::parse(R"(
 int "one" {
     value 1;
 };
@@ -268,7 +282,7 @@ int "answer" {
     value 42;
 };
 )",
-                               grammar);
+                               grammar, c);
 
     REQUIRE(c.ints[0].name == "one");
     REQUIRE(c.ints[0].value == 1);

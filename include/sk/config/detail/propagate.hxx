@@ -33,9 +33,9 @@
 
 namespace sk::config::detail {
     template <typename T, typename V> struct propagate {
-        V(T::*member);
+        V T::*member;
 
-        propagate(V(T::*member_)) : member(member_) {}
+        propagate(V T::*member_) : member(member_) {}
 
         template <typename To, typename From> void impl(To &to, From &from) {
             to = std::move(from);
@@ -63,10 +63,11 @@ namespace sk::config::detail {
 #endif
         }
     };
+    template <typename T, typename V> propagate(V T::*) -> propagate<T, V>;
 
 #if 0
     template<typename T, typename V>
-    auto propagate(V (T::*member)) {
+    auto propagate(V T::*member) {
         namespace x3 = boost::spirit::x3;
 
         return [=](auto &ctx) {
@@ -75,7 +76,7 @@ namespace sk::config::detail {
     }
 
     template<typename T, typename V>
-    auto propagate(std::vector<V>(T::*member)) {
+    auto propagate(std::vector<V> T::*member) {
         namespace x3 = boost::spirit::x3;
 
         return [=](auto &ctx) {
