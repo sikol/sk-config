@@ -249,7 +249,7 @@ parser for that type.  For example, to parse an hexadecimal integer
 prefixed with "0x":
 
 ```c++
-  cr::option("my-option", &S::hex_val, x3::lexeme["0x" > x3::hex]);
+  cfg::option("my-option", &S::hex_val, x3::lexeme["0x" > x3::hex]);
 ```
 
 The attribute type of the parser must be assignable to the struct member.
@@ -285,7 +285,7 @@ struct test_config {
 	std::vector<int> my_option;
 };
 
-x3::symbols<bool> syms;
+x3::symbols<int> syms;
 syms.add("one", 1)("two", 2)("three", 3);
 // ...
 	cfg::option("my-option", &test_config::my_option, syms % ',');
