@@ -33,14 +33,14 @@
 #include <fstream>
 #include <iostream>
 #include <ranges>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
 #include <fmt/core.h>
 
-#include <sk/config/error.hxx>
-#include <sk/config/parse.hxx>
+#include <sk/config.hxx>
 
 #include <boost/spirit/home/x3/support/utility/annotate_on_success.hpp>
 
@@ -67,21 +67,21 @@ int main(int argc, char **argv) {
     }
     std::filesystem::path filename(argv[1]);
 
-    namespace cr = sk::config::parser;
+    namespace cfg = sk::config;
 
-    auto grammar = cr::config<config>(
-        cr::block<user>("user", &user::username, &config::users,
-                        cr::option("uid", &user::uid),
-                        cr::option("gid", &user::gid)),
-        cr::block<group>("group", &group::name, &config::groups,
-                         cr::option("gid", &group::gid),
-                         cr::option("member", &group::members)));
+    auto grammar = cfg::config<config>(
+        cfg::block<user>("user", &user::username, &config::users,
+                         cfg::option("uid", &user::uid),
+                         cfg::option("gid", &user::gid)),
+        cfg::block<group>("group", &group::name, &config::groups,
+                          cfg::option("gid", &group::gid),
+                          cfg::option("member", &group::members)));
 
     config loaded_config;
 
     try {
-        sk::config::parse_file(filename, grammar, loaded_config);
-    } catch (sk::config::parse_error const &e) {
+        cfg::parse_file(filename, grammar, loaded_config);
+    } catch (cfg::parse_error const &e) {
         std::cerr << e;
         return 1;
     } catch (std::exception const &e) {

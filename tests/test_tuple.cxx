@@ -26,44 +26,37 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
-#define SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
+#include <catch.hpp>
 
-#include <deque>
-#include <list>
-#include <set>
-#include <unordered_set>
-#include <vector>
-#include <variant>
+#include <cstring>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
-#include <boost/spirit/home/x3.hpp>
+#include <sk/config/parser/tuple.hxx>
+#include <sk/config/parser/numeric.hxx>
+#include <sk/config/parser/string.hxx>
+#include <sk/config/option.hxx>
+#include <sk/config/config.hxx>
+#include <sk/config/parse.hxx>
 
-#include <sk/config/detail/propagate.hxx>
-#include <sk/config/error.hxx>
-#include <sk/config/parser_for.hxx>
+TEST_CASE("tuple<>") {
+    namespace cr = sk::config;
 
-namespace sk::config::detail {
-
-    struct member_tag : parser_error_handler {};
-
-    template <typename T, typename P> auto member_rule(const char *debug, P p) {
-        namespace x3 = boost::spirit::x3;
-        return x3::rule<member_tag, T>{debug} = p;
+    struct test_config {
+        std::tuple<int, std::string, float> v;
     };
 
-    template <typename T, typename V>
-    auto make_member_parser(V T::*const member) {
-        namespace x3 = boost::spirit::x3;
+    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
 
-        using rule_type = typename parser_for<V>::rule_type;
-        using parser_type = typename parser_for<V>::parser_type;
-
-        static parser_type parser;
-        static auto rule = member_rule<rule_type>(parser_for<V>::name, parser);
-
-        return x3::expect[rule][propagate(member)];
+    test_config c;
+    try {
+        sk::config::parse("v 42, 'test string', 1.5;", grammar, c);
+    } catch (sk::config::parse_error const &e) {
+        std::cerr << e;
     }
 
-} // namespace sk::config::detail
-
-#endif // SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
+    REQUIRE(get<0>(c.v) == 42);
+    REQUIRE(get<1>(c.v) == "test string");
+    REQUIRE(get<2>(c.v) == Approx(1.5));
+}

@@ -26,44 +26,44 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
-#define SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
+#ifndef SK_CONFIG_PARSER_NUMERIC_HPP
+#define SK_CONFIG_PARSER_NUMERIC_HPP
 
-#include <deque>
-#include <list>
-#include <set>
-#include <unordered_set>
-#include <vector>
-#include <variant>
+#include <concepts>
 
-#include <boost/spirit/home/x3.hpp>
-
-#include <sk/config/detail/propagate.hxx>
-#include <sk/config/error.hxx>
 #include <sk/config/parser_for.hxx>
 
-namespace sk::config::detail {
+#include <boost/spirit/home/x3/numeric/int.hpp>
+#include <boost/spirit/home/x3/numeric/real.hpp>
+#include <boost/spirit/home/x3/numeric/uint.hpp>
 
-    struct member_tag : parser_error_handler {};
+namespace sk::config {
 
-    template <typename T, typename P> auto member_rule(const char *debug, P p) {
-        namespace x3 = boost::spirit::x3;
-        return x3::rule<member_tag, T>{debug} = p;
+    // signed_integral
+    template <std::signed_integral T> struct parser_for<T> {
+        using parser_type = boost::spirit::x3::int_parser<T>;
+        using rule_type = T;
+        static constexpr char const name[] = "an integer";
     };
 
-    template <typename T, typename V>
-    auto make_member_parser(V T::*const member) {
-        namespace x3 = boost::spirit::x3;
+    // unsigned_integral
+    template <std::unsigned_integral T> struct parser_for<T> {
+        using parser_type = boost::spirit::x3::uint_parser<T>;
+        using rule_type = T;
+        static constexpr char const name[] = "a positive integer";
+    };
 
-        using rule_type = typename parser_for<V>::rule_type;
-        using parser_type = typename parser_for<V>::parser_type;
+    // floating_point
+    template <typename T>
+    struct config_real_policies : boost::spirit::x3::real_policies<T> {};
 
-        static parser_type parser;
-        static auto rule = member_rule<rule_type>(parser_for<V>::name, parser);
+    template <std::floating_point T> struct parser_for<T> {
+        using parser_type =
+            boost::spirit::x3::real_parser<float, config_real_policies<float>>;
+        using rule_type = T;
+        static constexpr char const name[] = "a decimal number";
+    };
 
-        return x3::expect[rule][propagate(member)];
-    }
+}; // namespace sk::config
 
-} // namespace sk::config::detail
-
-#endif // SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
+#endif // SK_CONFIG_PARSER_NUMERIC_HPP

@@ -29,28 +29,44 @@
 #ifndef SK_CONFIG_PARSER_VARIANT_HXX_INCLUDED
 #define SK_CONFIG_PARSER_VARIANT_HXX_INCLUDED
 
-#include <string>
+#include <variant>
 
-#include <boost/spirit/home/x3.hpp>
+#include <boost/spirit/home/x3/core/parser.hpp>
+#include <boost/spirit/home/x3/operator/alternative.hpp>
 
-namespace sk::config::parser {
+#include <sk/config/parser_for.hxx>
 
-    template <typename... Parsers>
-    struct variant_parser : boost::spirit::x3::parser<variant_parser<Parsers...>> {
-        typedef std::variant<typename Parsers::attribute_type...> attribute_type;
-        static bool const has_attribute = true;
+namespace sk::config {
 
-        template <typename Iterator, typename Context, typename Attribute>
-        bool parse(Iterator &first, Iterator const &last,
-                   Context const &context, boost::spirit::x3::unused_type,
-                   Attribute &attr) const {
-            namespace x3 = boost::spirit::x3;
+    namespace detail {
 
-            static auto const parser = (... | Parsers());
-            return parser.parse(first, last, context, x3::unused, attr);
-        }
+        template <typename... Parsers>
+        struct variant_parser
+            : boost::spirit::x3::parser<variant_parser<Parsers...>> {
+            typedef std::variant<typename Parsers::attribute_type...>
+                attribute_type;
+            static bool const has_attribute = true;
+
+            template <typename Iterator, typename Context, typename Attribute>
+            bool parse(Iterator &first, Iterator const &last,
+                       Context const &context, boost::spirit::x3::unused_type,
+                       Attribute &attr) const {
+                namespace x3 = boost::spirit::x3;
+
+                static auto const parser = (... | Parsers());
+                return parser.parse(first, last, context, x3::unused, attr);
+            }
+        };
+
+    } // namespace detail
+
+    template <typename... Ts> struct parser_for<std::variant<Ts...>> {
+        using parser_type =
+            detail::variant_parser<typename parser_for<Ts>::parser_type...>;
+        using rule_type = std::variant<Ts...>;
+        static constexpr char const name[] = "a value";
     };
 
-} // namespace sk::config::parser
+} // namespace sk::config
 
 #endif // SK_CONFIG_PARSER_VARIANT_HXX_INCLUDED

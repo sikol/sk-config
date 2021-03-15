@@ -26,49 +26,34 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_PARSER_ANY_STRING_HXX_INCLUDED
-#define SK_CONFIG_PARSER_ANY_STRING_HXX_INCLUDED
+#ifndef SK_CONFIG_DETAIL_VECTOR_PARSER_HXX_INCLUDED
+#define SK_CONFIG_DETAIL_VECTOR_PARSER_HXX_INCLUDED
 
 #include <string>
+#include <vector>
 
 #include <boost/spirit/home/x3.hpp>
-#include <sk/config/parser/identifier.hxx>
-#include <sk/config/parser/qstring.hxx>
 
-namespace sk::config::parser {
-    template <typename Char>
-    struct any_string_parser
-        : boost::spirit::x3::parser<any_string_parser<Char>> {
-        typedef std::basic_string<Char> attribute_type;
+namespace sk::config::detail {
+
+    // std::vector<T> attribute
+    template <typename T>
+    struct vector_parser : boost::spirit::x3::parser<vector_parser<T>> {
+        typedef std::vector<typename T::attribute_type> attribute_type;
         static bool const has_attribute = true;
-
-        template <typename Iterator, typename Context>
-        bool parse(Iterator &first, Iterator const &last,
-                   Context const &context, boost::spirit::x3::unused_type,
-                   attribute_type &attr) const {
-            namespace x3 = boost::spirit::x3;
-
-            static identifier_parser<Char> identifier;
-            static qstring_parser<Char> qstring;
-
-            static auto const grammar = identifier | qstring;
-
-            return grammar.parse(first, last, context, x3::unused, attr);
-        }
 
         template <typename Iterator, typename Context, typename Attribute>
         bool parse(Iterator &first, Iterator const &last,
                    Context const &context, boost::spirit::x3::unused_type,
-                   Attribute &attr_param) const {
-            attribute_type attr_;
-            if (parse(first, last, context, boost::spirit::x3::unused, attr_)) {
-                boost::spirit::x3::traits::move_to(attr_, attr_param);
-                return true;
-            }
-            return false;
+                   Attribute &attr) const {
+            namespace x3 = boost::spirit::x3;
+
+            static T parser;
+            static auto const grammar = parser % ',';
+            return grammar.parse(first, last, context, x3::unused, attr);
         }
     };
 
 } // namespace sk::config::parser
 
-#endif // SK_CONFIG_PARSER_ANY_STRING_HXX_INCLUDED
+#endif // SK_CONFIG_DETAIL_VECTOR_PARSER_HXX_INCLUDED

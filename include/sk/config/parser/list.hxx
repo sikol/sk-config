@@ -29,30 +29,19 @@
 #ifndef SK_CONFIG_PARSER_LIST_HXX_INCLUDED
 #define SK_CONFIG_PARSER_LIST_HXX_INCLUDED
 
-#include <string>
+#include <list>
 
-#include <boost/spirit/home/x3.hpp>
+#include <sk/config/detail/vector_parser.hxx>
+#include <sk/config/parser_for.hxx>
 
-namespace sk::config::parser {
+namespace sk::config {
 
-    // std::vector<T> attribute
-    template <typename T>
-    struct vector_parser : boost::spirit::x3::parser<vector_parser<T>> {
-        typedef std::vector<typename T::attribute_type> attribute_type;
-        static bool const has_attribute = true;
-
-        template <typename Iterator, typename Context, typename Attribute>
-        bool parse(Iterator &first, Iterator const &last,
-                   Context const &context, boost::spirit::x3::unused_type,
-                   Attribute &attr) const {
-            namespace x3 = boost::spirit::x3;
-
-            static T parser;
-            static auto const grammar = parser % ',';
-            return grammar.parse(first, last, context, x3::unused, attr);
-        }
+    template <typename T> struct parser_for<std::list<T>> {
+        using parser_type = detail::vector_parser<typename parser_for<T>::parser_type>;
+        using rule_type = std::vector<T>;
+        static constexpr char const name[] = "a list of values";
     };
 
-} // namespace sk::config::parser
+} // namespace sk::config
 
-#endif // SK_CONFIG_PARSER_IDENTIFIER_HXX_INCLUDED
+#endif // SK_CONFIG_PARSER_LIST_HXX_INCLUDED

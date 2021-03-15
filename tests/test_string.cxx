@@ -26,44 +26,57 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
-#define SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
+#include <catch.hpp>
 
-#include <deque>
-#include <list>
-#include <set>
-#include <unordered_set>
-#include <vector>
-#include <variant>
+#include <cstring>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
-#include <boost/spirit/home/x3.hpp>
+#include <sk/config/parser/string.hxx>
+#include <sk/config/option.hxx>
+#include <sk/config/config.hxx>
+#include <sk/config/parse.hxx>
 
-#include <sk/config/detail/propagate.hxx>
-#include <sk/config/error.hxx>
-#include <sk/config/parser_for.hxx>
+TEST_CASE("bare string") {
+    namespace cr = sk::config;
 
-namespace sk::config::detail {
-
-    struct member_tag : parser_error_handler {};
-
-    template <typename T, typename P> auto member_rule(const char *debug, P p) {
-        namespace x3 = boost::spirit::x3;
-        return x3::rule<member_tag, T>{debug} = p;
+    struct test_config {
+        std::string v;
     };
 
-    template <typename T, typename V>
-    auto make_member_parser(V T::*const member) {
-        namespace x3 = boost::spirit::x3;
+    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+    test_config c;
+    sk::config::parse("v bare-string;", grammar, c);
+    REQUIRE(c.v == "bare-string");
+}
 
-        using rule_type = typename parser_for<V>::rule_type;
-        using parser_type = typename parser_for<V>::parser_type;
+TEST_CASE("single-quoted string string") {
+    namespace cr = sk::config;
 
-        static parser_type parser;
-        static auto rule = member_rule<rule_type>(parser_for<V>::name, parser);
+    struct test_config {
+        std::string v;
+    };
 
-        return x3::expect[rule][propagate(member)];
-    }
+    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+    test_config c;
+    sk::config::parse(
+        "v 'a string with \\t tab \\n newline \\' quote \\\\ backslash';",
+        grammar, c);
+    REQUIRE(c.v == "a string with \t tab \n newline ' quote \\ backslash");
+}
 
-} // namespace sk::config::detail
+TEST_CASE("double-quoted string") {
+    namespace cr = sk::config;
 
-#endif // SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
+    struct test_config {
+        std::string v;
+    };
+
+    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+    test_config c;
+    sk::config::parse(
+        "v \"a string with \\t tab \\n newline \\\" quote \\\\ backslash\";",
+        grammar, c);
+    REQUIRE(c.v == "a string with \t tab \n newline \" quote \\ backslash");
+}

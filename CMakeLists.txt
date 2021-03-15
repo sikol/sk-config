@@ -47,19 +47,23 @@ add_library(sk-config INTERFACE)
 target_sources(sk-config PRIVATE 
 	include/sk/config/parse.hxx
 	include/sk/config/error.hxx
+	include/sk/config/error_detail.hxx
+	include/sk/config/parser_for.hxx
 	
 	include/sk/config/parser/qstring.hxx
 	include/sk/config/parser/identifier.hxx
-	include/sk/config/parser/any_string.hxx
-	include/sk/config/parser/comment.hxx
-	include/sk/config/parser/option.hxx
+	"include/sk/config/parser/string.hxx"
+	
+	
+	include/sk/config/parser/tuple.hxx
+	include/sk/config/parser/numeric.hxx
+	"include/sk/config/parser/vector.hxx"
+	include/sk/config/parser/variant.hxx
+
 	include/sk/config/detail/propagate.hxx
 	include/sk/config/detail/make_member_parser.hxx
-	include/sk/config/parser/list.hxx
-	include/sk/config/parser/variant.hxx
 	include/sk/config/detail/error_formatter.hxx
-	include/sk/config/error_detail.hxx
- "include/sk/config/parser/tuple.hxx")
+ "include/sk/config.hxx" "include/sk/config/detail/vector_parser.hxx" "include/sk/config/parser/list.hxx" "include/sk/config/parser/deque.hxx" "include/sk/config/parser/set.hxx" "include/sk/config/parser/unordered_set.hxx" "include/sk/config/detail/comment_parser.hxx" "include/sk/config/detail/rule.hxx" "include/sk/config/config.hxx" "include/sk/config/block.hxx" "include/sk/config/option.hxx")
 
 target_include_directories(sk-config INTERFACE include)
 target_compile_features(sk-config INTERFACE cxx_std_20)

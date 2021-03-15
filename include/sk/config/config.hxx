@@ -26,27 +26,35 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_PARSER_COMMENT_HXX_INCLUDED
-#define SK_CONFIG_PARSER_COMMENT_HXX_INCLUDED
+#ifndef SK_CONFIG_CONFIG_HXX_INCLUDED
+#define SK_CONFIG_CONFIG_HXX_INCLUDED
 
-#include <string>
+#include <utility>
 
 #include <boost/spirit/home/x3.hpp>
 
-namespace sk::config::parser {
-    /*
-     * Parse a comment, which is either a C-style comment or a '#'
-     * comment.
-     *
-     * This parser is not used directly, but is the config skip parser.
-     */
+#include <sk/config/detail/make_member_parser.hxx>
+#include <sk/config/detail/rule.hxx>
 
-    auto const comment = boost::spirit::x3::space                             //
-                         | "/*" >> *(boost::spirit::x3::char_ - "*/") >> "*/" //
-                         | "#" >> *(boost::spirit::x3::char_ -
-                                    boost::spirit::x3::eol) >>
-                               boost::spirit::x3::eol;
+namespace sk::config {
+
+    /*
+     * config<T>(members...): parse a configuration file with the given
+     * members, which can be either options or blocks.  The result of
+     * parse(..., config<T>(...)) is T.
+     */
+    template <typename T, typename... Members>
+    auto config(Members &&...members) {
+        namespace x3 = boost::spirit::x3;
+
+        auto member_parser = *(... | std::forward<Members>(members));
+
+        auto do_nothing = [&](auto &) {};
+        auto parser = member_parser[do_nothing];
+
+        return detail::rule<T>("config", parser);
+    }
 
 } // namespace sk::config::parser
 
-#endif // SK_CONFIG_PARSER_COMMENT_HXX_INCLUDED
+#endif // SK_CONFIG_CONFIG_HXX_INCLUDED

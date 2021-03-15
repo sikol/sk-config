@@ -33,8 +33,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <sk/config/error.hxx>
-#include <sk/config/parse.hxx>
+#include <sk/config.hxx>
 
 TEST_CASE("basic config") {
     struct test_block {
@@ -48,7 +47,7 @@ TEST_CASE("basic config") {
         test_block b;
     };
 
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     auto grammar = cr::config<test_config>(
         cr::option("other-int-value", &test_config::other_int_value),
@@ -75,7 +74,7 @@ test-block {
 }
 
 TEST_CASE("vector of items") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         std::vector<int> items;
@@ -98,7 +97,7 @@ int-value 666;
 }
 
 TEST_CASE("named block") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct int_config {
         std::string name;

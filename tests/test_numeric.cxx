@@ -33,7 +33,9 @@
 #include <stdexcept>
 #include <string>
 
-#include <sk/config/error.hxx>
+#include <sk/config/parser/numeric.hxx>
+#include <sk/config/option.hxx>
+#include <sk/config/config.hxx>
 #include <sk/config/parse.hxx>
 
 /*
@@ -41,7 +43,7 @@
  */
 
 TEST_CASE("bool") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         bool v;
@@ -54,7 +56,7 @@ TEST_CASE("bool") {
 }
 
 TEST_CASE("unsigned short value") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         unsigned short v;
@@ -67,7 +69,7 @@ TEST_CASE("unsigned short value") {
 }
 
 TEST_CASE("short value") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         short v;
@@ -80,7 +82,7 @@ TEST_CASE("short value") {
 }
 
 TEST_CASE("unsigned int value") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         unsigned int v;
@@ -93,7 +95,7 @@ TEST_CASE("unsigned int value") {
 }
 
 TEST_CASE("int value") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         int v;
@@ -106,7 +108,7 @@ TEST_CASE("int value") {
 }
 
 TEST_CASE("unsigned long value") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         unsigned long v;
@@ -119,7 +121,7 @@ TEST_CASE("unsigned long value") {
 }
 
 TEST_CASE("long value") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         long v;
@@ -132,7 +134,7 @@ TEST_CASE("long value") {
 }
 
 TEST_CASE("unsigned long long value") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         unsigned long long v;
@@ -145,7 +147,7 @@ TEST_CASE("unsigned long long value") {
 }
 
 TEST_CASE("long long value") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         long long v;
@@ -158,7 +160,7 @@ TEST_CASE("long long value") {
 }
 
 TEST_CASE("float value") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         float v;
@@ -171,7 +173,7 @@ TEST_CASE("float value") {
 }
 
 TEST_CASE("double value") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         double v;
@@ -184,7 +186,7 @@ TEST_CASE("double value") {
 }
 
 TEST_CASE("long double value") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         long double v;
@@ -197,7 +199,7 @@ TEST_CASE("long double value") {
 }
 
 TEST_CASE("double with int argument") {
-    namespace cr = sk::config::parser;
+    namespace cr = sk::config;
 
     struct test_config {
         double v;
@@ -223,46 +225,3 @@ TEST_CASE("hex int") {
     REQUIRE(c.v == 0x50);
 }
 #endif
-
-TEST_CASE("bare string") {
-    namespace cr = sk::config::parser;
-
-    struct test_config {
-        std::string v;
-    };
-
-    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    test_config c;
-    sk::config::parse("v bare-string;", grammar, c);
-    REQUIRE(c.v == "bare-string");
-}
-
-TEST_CASE("single-quoted string string") {
-    namespace cr = sk::config::parser;
-
-    struct test_config {
-        std::string v;
-    };
-
-    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    test_config c;
-    sk::config::parse(
-        "v 'a string with \\t tab \\n newline \\' quote \\\\ backslash';", grammar,
-        c);
-    REQUIRE(c.v == "a string with \t tab \n newline ' quote \\ backslash");
-}
-
-TEST_CASE("double-quoted string") {
-    namespace cr = sk::config::parser;
-
-    struct test_config {
-        std::string v;
-    };
-
-    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    test_config c;
-    sk::config::parse(
-        "v \"a string with \\t tab \\n newline \\\" quote \\\\ backslash\";", grammar,
-        c);
-    REQUIRE(c.v == "a string with \t tab \n newline \" quote \\ backslash");
-}

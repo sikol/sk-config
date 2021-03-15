@@ -26,40 +26,50 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_PARSER_TUPLE_HXX_INCLUDED
-#define SK_CONFIG_PARSER_TUPLE_HXX_INCLUDED
+#ifndef SK_CONFIG_PARSER_ANY_STRING_HXX_INCLUDED
+#define SK_CONFIG_PARSER_ANY_STRING_HXX_INCLUDED
 
 #include <string>
 
-#include <boost/fusion/include/std_tuple.hpp>
-#include <boost/spirit/home/x3.hpp>
+#include <boost/spirit/home/x3/core/parser.hpp>
+#include <boost/spirit/home/x3/operator/alternative.hpp>
+#include <boost/spirit/home/x3/support/unused.hpp>
 
+#include <sk/config/parser/identifier.hxx>
+#include <sk/config/parser/qstring.hxx>
 #include <sk/config/parser_for.hxx>
 
 namespace sk::config::parser {
-
-    template <typename... Parsers>
-    struct tuple_parser : boost::spirit::x3::parser<tuple_parser<Parsers...>> {
-        typedef std::tuple<typename Parsers::attribute_type...> attribute_type;
+    template <typename Char>
+    struct any_string_parser
+        : boost::spirit::x3::parser<any_string_parser<Char>> {
+        typedef std::basic_string<Char> attribute_type;
         static bool const has_attribute = true;
 
-        template <typename Last> auto make_parser_for() const {
-            return Last();
-        }
+        template <typename Iterator, typename Context>
+        bool parse(Iterator &first, Iterator const &last,
+                   Context const &context, boost::spirit::x3::unused_type,
+                   attribute_type &attr) const {
+            namespace x3 = boost::spirit::x3;
 
-        template <typename Here, typename Next, typename... Rest>
-        auto make_parser_for() const {
-            return Here() > ',' > Next() > ',' > make_parser_for<Rest...>();
+            static identifier_parser<Char> identifier;
+            static qstring_parser<Char> qstring;
+
+            static auto const grammar = identifier | qstring;
+
+            return grammar.parse(first, last, context, x3::unused, attr);
         }
 
         template <typename Iterator, typename Context, typename Attribute>
         bool parse(Iterator &first, Iterator const &last,
                    Context const &context, boost::spirit::x3::unused_type,
-                   Attribute &attr) const {
-            namespace x3 = boost::spirit::x3;
-
-            static auto const parser = make_parser_for<Parsers...>();
-            return parser.parse(first, last, context, x3::unused, attr);
+                   Attribute &attr_param) const {
+            attribute_type attr_;
+            if (parse(first, last, context, boost::spirit::x3::unused, attr_)) {
+                boost::spirit::x3::traits::move_to(attr_, attr_param);
+                return true;
+            }
+            return false;
         }
     };
 
@@ -67,13 +77,12 @@ namespace sk::config::parser {
 
 namespace sk::config {
 
-    template <typename... Ts> struct parser_for<std::tuple<Ts...>> {
-        using parser_type =
-            parser::tuple_parser<typename parser_for<Ts>::parser_type...>;
-        using rule_type = std::tuple<Ts...>;
-        static constexpr char const name[] = "a list of values";
+    template <typename Char> struct parser_for<std::basic_string<Char>> {
+        using parser_type = parser::any_string_parser<Char>;
+        using rule_type = std::basic_string<Char>;
+        static constexpr char const name[] = "a string";
     };
 
 } // namespace sk::config
 
-#endif // SK_CONFIG_PARSER_TUPLE_HXX_INCLUDED
+#endif // SK_CONFIG_PARSER_ANY_STRING_HXX_INCLUDED

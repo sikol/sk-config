@@ -29,25 +29,11 @@
 #ifndef SK_CONFIG_PARSER_OPTION_HXX_INCLUDED
 #define SK_CONFIG_PARSER_OPTION_HXX_INCLUDED
 
-#include <string>
-
 #include <boost/spirit/home/x3.hpp>
-#include <boost/spirit/home/x3/support/utility/error_reporting.hpp>
 
 #include <sk/config/detail/make_member_parser.hxx>
-#include <sk/config/detail/propagate.hxx>
-#include <sk/config/parser/identifier.hxx>
-#include <sk/config/parser/qstring.hxx>
-#include <sk/config/error.hxx>
 
-namespace sk::config::parser {
-
-    struct rule_tag : parser_error_handler {};
-
-    template <typename T, typename P> auto rule(const char *debug, P p) {
-        namespace x3 = boost::spirit::x3;
-        return x3::rule<rule_tag, T>{debug} = p;
-    };
+namespace sk::config {
 
     /*
      * option(label, member): parse an option with the given label (usually
@@ -67,52 +53,6 @@ namespace sk::config::parser {
                    ';';
         }
     };
-
-    /*
-     * block(label, members...): parse a block with the given label which
-     * contains the members.
-     */
-    template <typename U, typename T, typename V, typename... Members>
-    auto block(auto label, V T::*mm, Members &&...members) {
-        namespace x3 = boost::spirit::x3;
-
-        auto member_parser = *(... | std::forward<Members>(members));
-
-        auto do_nothing = [&](auto &) {};
-        auto parser = x3::as_parser(label) >> ('{' >
-                      member_parser[do_nothing] > '}') > ';';
-        return rule<U>(label, parser)[detail::propagate(mm)];
-    }
-
-    template <typename U, typename W, typename T, typename V,
-              typename... Members>
-    auto block(auto label, W U::*name, V T::*mm, Members &&...members) {
-        namespace x3 = boost::spirit::x3;
-
-        auto member_parser = *(... | std::forward<Members>(members));
-
-        auto do_nothing = [&](auto &) {};
-        auto parser = x3::as_parser(label) >> detail::make_member_parser(name) >> ('{' >
-                      member_parser[do_nothing] > '}') > ';';
-        return rule<U>(label, parser)[detail::propagate(mm)];
-    }
-
-    /*
-     * config<T>(members...): parse a configuration file with the given
-     * members, which can be either options or blocks.  The result of
-     * dparse(..., config<T>(...)) is T.
-     */
-    template <typename T, typename... Members>
-    auto config(Members &&...members) {
-        namespace x3 = boost::spirit::x3;
-
-        auto member_parser = *(... | std::forward<Members>(members));
-
-        auto do_nothing = [&](auto &) {};
-        auto parser = member_parser[do_nothing];
-        //> x3::eoi;
-        return rule<T>("config", parser);
-    }
 
 } // namespace sk::config::parser
 

@@ -43,8 +43,7 @@ access {
 A parser can be created like this:
 
 ```c++
-#include <sk/config/parse.hxx>
-#include <boost/spirit/include/support_istream_iterator.hpp>
+#include <sk/config.hxx>
 
 struct user {
 	std::string name;
@@ -61,21 +60,21 @@ struct config {
 };
 
 int main(int argc, char **argv) {
-	namespace cp = sk::config::parsers;
+	namespace cfg = sk::config;
 
-	auto grammar = cp::config<config>(
+	auto grammar = cfg::config<config>(
 
-		cp::block<user>("user", &user::name, &config::users,
-			cp::option("password", &user::password)),
+		cfg::block<user>("user", &user::name, &config::users,
+			cfg::option("password", &user::password)),
 
-		cp::block<access_config>("access", &config::access,
-			cp::option("allow", &access_config::allow_users))
+		cfg::block<access_config>("access", &config::access,
+			cfg::option("allow", &access_config::allow_users))
 	);
 
 	config loaded_config;
 	try {
-		sk::config::parse_file(argv[1], grammar, loaded_config);
-	} catch (sk::config::parse_error const &e) {
+		cfg::parse_file(argv[1], grammar, loaded_config);
+	} catch (cfg::parse_error const &e) {
 		std::cerr << e;
 		return 1;
 	}
@@ -123,14 +122,47 @@ user "scott" {
 };
 ```
 
+Single-line comments are introduced with `#`, and multi-line comments are
+confixed with `/* ... */`.
+
+## Include files
+
+The easiest way to use the library is to include `<sk/config.hxx>`, which
+includes all functionality.  If you prefer to only include required
+functionality, you can use the individual include files.
+
+Core functionality:
+
+* `<sk/config/parse.hxx>` - `parse()` function
+* `<sk/config/option.hxx>` - `option()` function
+* `<sk/config/block.hxx>` - `block()` function
+* `<sk/config/config.hxx>` - `config()` function
+
+Basic parsers:
+
+* `<sk/config/parser/numeric.hxx>` - integral and floating point parsers
+* `<sk/config/parser/string.hxx>` - `std::basic_string` parser
+
+Standard container parsers:
+
+* `<sk/config/parser/deque.hxx>`
+* `<sk/config/parser/list.hxx>`
+* `<sk/config/parser/set.hxx>`
+* `<sk/config/parser/tuple.hxx>`
+* `<sk/config/parser/unordered_set.hxx>`
+* `<sk/config/parser/variant.hxx>`
+* `<sk/config/parser/vector.hxx>`
+
 ## Supported types
 
 `sk-config` requires a parser for each type used in the configuration file.
 Parsers are provided for most common built-in types and STL containers.
 
-Due to how Spirit works, parsing into `std::any` (or similar types) is _not_
-supported; the parser needs to know ahead of time what type(s) are being
-parsed, and cannot enumerate all parsable types.
+Due to how Spirit works, parsing into `std::any` or similar type-erasing
+containers is _not_ supported; the parser needs to know ahead of time what
+type(s) are being parsed, and cannot enumerate all parsable types.  However,
+parsing into `tuple`- or `variant`-like types is supported, since all types
+are known.
 
 ### Integers
 
