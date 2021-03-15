@@ -168,7 +168,7 @@ are known.
 
 Any type that meets the requirements of `std::integral` is parsed using the
 standard Spirit integer parser.  Numbers must be in base 10, and base prefixes
-(`0x`, `0`) are not supported.  (This may be improved in the future.)
+(`0x`, `0`) are not supported. 
 
 Examples:
 * `opt 1;`
@@ -188,7 +188,7 @@ Examples:
 ### Booleans
 
 `bool` is parsed differently from other types since it has no value.  Instead,
-specifying the value is treated as `true`.
+specifying the option is treated as `true`.
 
 Example:
 * `my-option;`
@@ -241,6 +241,16 @@ not working correctly.
 
 `std::tuple<Ts...>` is parsed as a comma-separated list of its contained
 types.  All types in `Ts` must be supported types.
+
+### Custom parsers
+
+A custom parser can be passed to `option()` to override the default
+parser for that type.  For example, to pass a hexidecimal integer
+prefixed with "0x":
+
+```c++
+  cr::option("my-option", &S::hex_val, x3::lexeme["0x" > x3::hex]);
+```
 
 ## API usage
 

@@ -211,17 +211,3 @@ TEST_CASE("double with int argument") {
     REQUIRE(c.v == Approx(5));
 }
 
-#if 0
-TEST_CASE("hex int") {
-    namespace cr = sk::config::parser;
-
-    struct test_config {
-        unsigned v;
-    };
-
-    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
-    test_config c;
-    sk::config::parse("v 0x50;", grammar, c);
-    REQUIRE(c.v == 0x50);
-}
-#endif

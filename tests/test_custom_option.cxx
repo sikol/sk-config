@@ -26,40 +26,29 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_PARSER_OPTION_HXX_INCLUDED
-#define SK_CONFIG_PARSER_OPTION_HXX_INCLUDED
+#include <catch.hpp>
 
-#include <boost/spirit/home/x3.hpp>
+#include <cstring>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
-#include <sk/config/detail/make_member_parser.hxx>
+#include <sk/config/config.hxx>
+#include <sk/config/option.hxx>
+#include <sk/config/parse.hxx>
+#include <sk/config/parser/numeric.hxx>
 
-namespace sk::config {
+TEST_CASE("hex int") {
+    namespace cfg = sk::config;
+    namespace x3 = boost::spirit::x3;
 
-    template <typename T, typename V, typename Parser>
-    auto option(auto label, V T::*member, Parser p) {
-        namespace x3 = boost::spirit::x3;
-
-        static auto rule =
-            detail::member_rule<V>("value", p);
-
-        return x3::as_parser(label) >
-               x3::expect[rule][detail::propagate(member)] > ';';
-    }
-
-    template <typename T, typename V> auto option(auto label, V T::*member) {
-        namespace x3 = boost::spirit::x3;
-
-        if constexpr (std::same_as<bool, V>) {
-            // bool is special because it doesn't have a value.
-            auto set_bool = [=](auto &ctx) { x3::_val(ctx).*member = true; };
-            auto parser = x3::as_parser(label) > ';';
-            return parser[set_bool];
-        } else {
-            return x3::as_parser(label) > detail::make_member_parser(member) >
-                   ';';
-        }
+    struct test_config {
+        unsigned v;
     };
 
-} // namespace sk::config
-
-#endif // SK_CONFIG_PARSER_OPTION_HXX_INCLUDED
+    auto grammar = cfg::config<test_config>(
+        cfg::option("v", &test_config::v, x3::lexeme["0x" > x3::hex]));
+    test_config c;
+    cfg::parse("v 0x50;", grammar, c);
+    REQUIRE(c.v == 0x50);
+}
