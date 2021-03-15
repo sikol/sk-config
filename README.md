@@ -173,7 +173,7 @@ identifiers: an alphabetic character followed by alphanumeric characters,
 Examples:
 
 * `opt some-string;`
-* `opt 'longer string with spaces';
+* `opt 'longer string with spaces';`
 * `opt "a \"string\" with a newline\n in it\n";`
 
 ### Lists
