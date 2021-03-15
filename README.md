@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
 
 	config loaded_config;
 	try {
-		sk::config::parse_file(argv[1], end, grammar, loaded_config);
+		sk::config::parse_file(argv[1], grammar, loaded_config);
 	} catch (sk::config::parse_error const &e) {
 		std::cerr << e;
 		return 1;
