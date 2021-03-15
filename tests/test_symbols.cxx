@@ -26,39 +26,49 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_PARSER_OPTION_HXX_INCLUDED
-#define SK_CONFIG_PARSER_OPTION_HXX_INCLUDED
+#include <catch.hpp>
 
-#include <boost/spirit/home/x3.hpp>
+#include <set>
 
-#include <sk/config/detail/make_member_parser.hxx>
+#include <sk/config.hxx>
 
-namespace sk::config {
+TEST_CASE("single symbol") {
+    namespace x3 = boost::spirit::x3;
+    namespace cfg = sk::config;
 
-    template <typename T, typename V, typename Parser>
-    auto option(auto label, V T::*member, Parser p) {
-        namespace x3 = boost::spirit::x3;
-
-        auto rule = detail::member_rule<V>("value", p);
-
-        return x3::as_parser(label) >
-               x3::expect[rule][detail::propagate(member)] > ';';
-    }
-
-    template <typename T, typename V> auto option(auto label, V T::*member) {
-        namespace x3 = boost::spirit::x3;
-
-        if constexpr (std::same_as<bool, V>) {
-            // bool is special because it doesn't have a value.
-            auto set_bool = [=](auto &ctx) { x3::_val(ctx).*member = true; };
-            auto parser = x3::as_parser(label) > ';';
-            return parser[set_bool];
-        } else {
-            return x3::as_parser(label) > detail::make_member_parser(member) >
-                   ';';
-        }
+    struct test_config {
+        int val;
     };
 
-} // namespace sk::config
+    x3::symbols<int> syms;
+    syms.add("one", 1)("two", 2)("three", 3);
 
-#endif // SK_CONFIG_PARSER_OPTION_HXX_INCLUDED
+    auto grammar =
+        cfg::config<test_config>(cfg::option("val", &test_config::val, syms));
+
+    test_config c;
+    cfg::parse("val two;", grammar, c);
+    REQUIRE(c.val == 2);
+}
+
+TEST_CASE("vector of symbols") {
+    namespace x3 = boost::spirit::x3;
+    namespace cfg = sk::config;
+
+    struct test_config {
+        std::vector<int> val;
+    };
+
+    x3::symbols<int> syms;
+    syms.add("one", 1)("two", 2)("three", 3);
+
+    auto grammar = //
+        cfg::config<test_config>( //
+            cfg::option("val", &test_config::val, syms % ','));
+
+    test_config c;
+    cfg::parse("val two, three;", grammar, c);
+    REQUIRE(c.val.size() == 2);
+    REQUIRE(c.val[0] == 2);
+    REQUIRE(c.val[1] == 3);
+}

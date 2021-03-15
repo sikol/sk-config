@@ -244,12 +244,55 @@ types.  All types in `Ts` must be supported types.
 
 ### Custom parsers
 
-A custom parser can be passed to `option()` to override the default
-parser for that type.  For example, to pass a hexidecimal integer
+A custom Spirit parser can be passed to `option()` to override the default
+parser for that type.  For example, to parse an hexadecimal integer
 prefixed with "0x":
 
 ```c++
   cr::option("my-option", &S::hex_val, x3::lexeme["0x" > x3::hex]);
+```
+
+The attribute type of the parser must be assignable to the struct member.
+
+### Symbols
+
+Spirit's built-in symbol table support can be used to parse options that
+contain a list of fixed string values.  
+
+For example, an option which can be either "on" or "off":
+
+```
+my-option off;
+```
+
+Could be parsed like this:
+
+```c++
+struct test_config {
+	bool my_option;
+};
+
+x3::symbols<bool> syms;
+syms.add("on", true)("off", false);
+// ...
+	cfg::option("my-option", &test_config::my_option, syms);
+```
+
+Symbols can also be used to parse a list of values:
+
+```c++
+struct test_config {
+	std::vector<int> my_option;
+};
+
+x3::symbols<bool> syms;
+syms.add("one", 1)("two", 2)("three", 3);
+// ...
+	cfg::option("my-option", &test_config::my_option, syms % ',');
+```
+
+```
+my-option one, three;  # test_config.my_options == {1, 3}
 ```
 
 ## API usage

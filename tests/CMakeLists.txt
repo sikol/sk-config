@@ -31,7 +31,7 @@ add_executable(test_sk_config
 	test_parse.cxx
 	"test_numeric.cxx"
 	"test_vector.cxx"
- "test_string.cxx" "test_tuple.cxx" "test_variant.cxx" "test_set.cxx" "test_unordered_set.cxx" "test_list.cxx" "test_deque.cxx" "test_custom_option.cxx")
+ "test_string.cxx" "test_tuple.cxx" "test_variant.cxx" "test_set.cxx" "test_unordered_set.cxx" "test_list.cxx" "test_deque.cxx" "test_custom_option.cxx" "test_symbols.cxx")
 target_link_libraries(test_sk_config PRIVATE sk-config Catch2::Catch2)
 
 add_test(NAME test_sk_config 
