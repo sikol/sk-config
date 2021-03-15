@@ -51,23 +51,23 @@ struct user {
 };
 
 struct access_config {
-	std::vector&lt;std::string&gt; allow_users;
+	std::vector<std::string> allow_users;
 };
 
 struct config {
-	std::vector&lt;user&gt; users;
+	std::vector<user> users;
 	access_config access;
 };
 
 int main(int argc, char **argv) {
 	namespace cp = sk::config::parsers;
 
-	auto grammar = cp::config&lt;config&gt;(
+	auto grammar = cp::config<config>(
 
-		cp::block&lt;user&gt;("user", &user::name, &config::users,
+		cp::block<user>("user", &user::name, &config::users,
 			cp::option("password", &user::password)),
 
-		cp::block&lt;access_config&gt;("access", &config::access,
+		cp::block<access_config>("access", &config::access,
 			cp::option("allow", &access_config::allow_users))
 	);
 
