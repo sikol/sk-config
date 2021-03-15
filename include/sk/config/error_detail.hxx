@@ -58,20 +58,25 @@ namespace sk::config {
 
     inline auto operator<<(std::ostream &strm, error_detail const &err)
         -> std::ostream & {
-        if (!err.file.empty())
-            strm << "in " << err.file << ", ";
+        if (!err.file.empty() && err.line > 0)
+            strm << "in " << err.file << ", line " << err.line << ": ";
+        else if (err.line > 0)
+            strm << "line " << err.line << ": ";
+        else if (!err.file.empty())
+            strm << err.file << ": ";
 
-        strm << "line " << err.line << ": ";
         strm << err.message << '\n';
 
         // Print the context but convert tabs to a single space, so that
         // the error marker lines up.
-        strm << "      ";
-        for (auto &&c : err.context)
-            strm << (c == '\t' ? ' ' : c);
-        strm << '\n';
+        if (err.line != 0) {
+            strm << "      ";
+            for (auto &&c : err.context)
+                strm << (c == '\t' ? ' ' : c);
+            strm << '\n';
 
-        strm << "here -" << std::string(err.column, '-') << "^\n";
+            strm << "here -" << std::string(err.column, '-') << "^\n";
+        }
 
         return strm;
     }

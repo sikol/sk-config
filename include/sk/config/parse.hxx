@@ -30,33 +30,40 @@
 #define SK_CONFIG_CONFIG_PARSE_HXX
 
 #include <iostream>
+#include <fstream>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
 #include <type_traits>
 #include <variant>
+#include <filesystem>
 
 #include <boost/spirit/home/x3.hpp>
 #include <boost/spirit/home/x3/support/utility/error_reporting.hpp>
+#include <boost/spirit/include/support_istream_iterator.hpp>
+#include <boost/spirit/home/x3/support/utility/utf8.hpp>
 
+#include <sk/config/detail/error_formatter.hxx>
 #include <sk/config/error.hxx>
 #include <sk/config/parse.hxx>
 #include <sk/config/parser/comment.hxx>
 #include <sk/config/parser/identifier.hxx>
 #include <sk/config/parser/option.hxx>
 #include <sk/config/parser/qstring.hxx>
-#include <sk/config/error.hxx>
-#include <sk/config/detail/error_formatter.hxx>
 
 namespace sk::config {
 
+    /*
+     * Wrapper around x3::phrase_parse to handle errors.
+     */
     template <typename Iterator>
-    auto parse(Iterator first, Iterator last, auto const &grammar, auto &ret) {
+    auto parse(Iterator first, Iterator last,
+               auto const &grammar, auto &ret, std::string const &filename = "") {
         namespace x3 = boost::spirit::x3;
 
         std::vector<error_detail> errors;
-        auto error_handler =
-            detail::error_formatter(first, last, std::back_inserter(errors));
+        auto error_handler = detail::error_formatter(
+            first, last, std::back_inserter(errors), filename);
 
         auto const grammar_ =
             x3::with<x3::error_handler_tag>(std::ref(error_handler))[grammar];
@@ -68,15 +75,43 @@ namespace sk::config {
     }
 
     auto parse(std::ranges::range auto const &r, auto const &grammar,
-               auto &ret) {
+               auto &ret, std::string const &filename = "") {
         return sk::config::parse(std::ranges::begin(r), std::ranges::end(r),
-                                 grammar, ret);
+                                 grammar, ret, filename);
     }
 
-    auto parse(char const *s, auto const &grammar, auto &ret) {
-        return sk::config::parse(std::string_view(s), grammar, ret);
+    auto parse(char const *s, auto const &grammar, auto &ret,
+        std::string const &filename = "") {
+        return sk::config::parse(std::string_view(s), grammar, ret, filename);
     }
 
+    auto parse_file(std::filesystem::path filename, auto const& grammar,
+        auto& ret) {
+
+        std::ifstream fs;
+        fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+        auto utf8name = boost::spirit::x3::to_utf8(filename.native());
+
+        try {
+            fs.open(filename);
+            fs.unsetf(std::ios::skipws);
+            boost::spirit::istream_iterator begin(fs), end;
+            return parse(begin, end, grammar, ret, utf8name);
+        } catch (std::ios_base::failure const &e) {
+            error_detail ed;
+            ed.file = utf8name;
+            ed.line = 0;
+            ed.column = 0;
+
+            std::ostringstream strm;
+            auto error_code = e.code();
+            strm << filename << ": cannot read file: " << error_code.message();
+            ed.message = strm.str();
+
+            throw parse_error(ed.message, std::vector<error_detail>{ed});
+        }
+    }
 } // namespace sk::config
 
 #endif // YARROW_CONFIG_PARSE_HXX

@@ -43,7 +43,6 @@
 #include <sk/config/parse.hxx>
 
 #include <boost/spirit/home/x3/support/utility/annotate_on_success.hpp>
-#include <boost/spirit/include/support_istream_iterator.hpp>
 
 struct user {
     int uid, gid;
@@ -66,13 +65,7 @@ int main(int argc, char **argv) {
         fmt::print(stderr, "usage: {} <filename>\n", argv[0]);
         return 1;
     }
-
-    std::ifstream config_file(argv[1]);
-    if (!config_file) {
-        fmt::print(stderr, "{}: {}", argv[1], std::strerror(errno));
-        return 1;
-    }
-    config_file.unsetf(std::ios::skipws);
+    std::filesystem::path filename(argv[1]);
 
     namespace cr = sk::config::parser;
 
@@ -84,10 +77,10 @@ int main(int argc, char **argv) {
                          cr::option("gid", &group::gid),
                          cr::option("member", &group::members)));
 
-    boost::spirit::istream_iterator begin(config_file), end;
     config loaded_config;
+
     try {
-        sk::config::parse(begin, end, grammar, loaded_config);
+        sk::config::parse_file(filename, grammar, loaded_config);
     } catch (sk::config::parse_error const &e) {
         std::cerr << e;
         return 1;

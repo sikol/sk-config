@@ -1,13 +1,25 @@
 # `sk-config`
 
-`sk-config` is a declarative parser for `named`-style configuration files
-based on Spirit X3.  While there are many different types of configuration
-file format (XML, JSON, YAML, TOML, Ini, ...), `named`-style configuration
-files have the advantage of being terse, easy to read and write, and very
-common among Unix applications.
+`sk-config` is a C++ configuration parser library based on Spirit X3.
 
-**WARNING**: This library is still in development and is not completely
-functional yet.
+Features:
+
+* Parses the widely-used `named`-style configuration file format which is 
+  easy for humans to read and write and familiar to users.
+* Useful, human-readable error reporting:
+```
+line 9: expected a string
+      group 0 {};
+here -------^
+```
+* Simple API abstracts away the details of Spirit for most parsers, but
+  provides full to the underlying Spirit parser if desired.
+* Parse collections of data directly into STL containers.
+* Dynamically-generated parser can be extended to support any data type,
+  including user-defined types, or even embed complete sub-parsers.
+
+**WARNING**: This library is still in development and almost certainly
+contains bugs; if you find any, please file an issue or a PR.
 
 ## Example
 
@@ -39,32 +51,29 @@ struct user {
 };
 
 struct access_config {
-	std::vector<std::string> allow_users;
+	std::vector&lt;std::string&gt; allow_users;
 };
 
 struct config {
-	std::vector<user> users;
+	std::vector&lt;user&gt; users;
 	access_config access;
 };
 
 int main(int argc, char **argv) {
-	std::ifstream config_file(argv[1]);
-	boost::spirit::istream_iterator begin(config_file), end;
-
 	namespace cp = sk::config::parsers;
 
-	auto grammar = cp::config<config>(
+	auto grammar = cp::config&lt;config&gt;(
 
-		cr::block<user>("user", &user::name, &config::users,
-			cr::option("password", &user::password)),
+		cp::block&lt;user&gt;("user", &user::name, &config::users,
+			cp::option("password", &user::password)),
 
-		cr::block<access_config>("access", &config::access,
-			cr::option("allow", &access_config::allow_users))
+		cp::block&lt;access_config&gt;("access", &config::access,
+			cp::option("allow", &access_config::allow_users))
 	);
 
 	config loaded_config;
 	try {
-		sk::config::parse(begin, end, grammar);
+		sk::config::parse_file(argv[1], end, grammar);
 	} catch (sk::config::parse_error const &e) {
 		std::cerr << e;
 		return 1;
@@ -72,12 +81,18 @@ int main(int argc, char **argv) {
 }
 ```
 
+## Supported compilers
+
+`sk-config` is tested with MSVC 19.29 (VS 2019 16.10) and clang-cl 11.0.1
+using the Microsoft STL.  It should work with any reasonably-compliant
+compiler supporting C++20.
+
 ## Configuration file format
 
 The general format of the configuration file is:
 
 ```
-option [value] [{ [option; option; ...] }];
+option [value] [{ [sub-options...] }];
 ```
 
 For example:
@@ -96,7 +111,7 @@ my-option { sub-option 42; };
 my-option 42 { sub-option 666; };
 ```
 
-When an option has both a value and sub-options it usually defines an
+When an option has both a value and sub-options it usually represents an
 object, where the value of the option is the name of the object and the
 sub-options are properties of the object.  For example:
 
