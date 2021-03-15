@@ -40,6 +40,19 @@
  * Declarative parser tests.
  */
 
+TEST_CASE("bool") {
+    namespace cr = sk::config::parser;
+
+    struct test_config {
+        bool v;
+    };
+
+    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+    test_config c;
+    sk::config::parse("v;", grammar, c);
+    REQUIRE(c.v == true);
+}
+
 TEST_CASE("unsigned short value") {
     namespace cr = sk::config::parser;
 

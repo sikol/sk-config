@@ -29,11 +29,12 @@
 #ifndef SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
 #define SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
 
+#include <deque>
 #include <list>
 #include <set>
-#include <vector>
-#include <deque>
 #include <unordered_set>
+#include <vector>
+#include <variant>
 
 #include <boost/spirit/home/x3.hpp>
 
@@ -41,85 +42,60 @@
 #include <sk/config/error.hxx>
 #include <sk/config/parser/any_string.hxx>
 #include <sk/config/parser/identifier.hxx>
-#include <sk/config/parser/list.hxx>
 #include <sk/config/parser/qstring.hxx>
+#include <sk/config/parser/list.hxx>
+#include <sk/config/parser/variant.hxx>
+#include <sk/config/parser/tuple.hxx>
 
 namespace sk::config::detail {
 
     template <typename T> struct parser_for {
-        // using parser = void;
     };
 
-    template <> struct parser_for<std::string> {
-        using parser = parser::any_string_parser<char>;
+    template <typename T> struct parser_for<std::vector<T>> {
+        using parser = parser::vector_parser<typename parser_for<T>::parser>;
+        using rule_type = std::vector<T>;
         static constexpr char const name[] = "a string";
     };
 
-    template <> struct parser_for<std::wstring> {
-        using parser = parser::any_string_parser<wchar_t>;
+    template <typename Char> struct parser_for<std::basic_string<Char>> {
+        using parser = parser::any_string_parser<Char>;
+        using rule_type = std::basic_string<Char>;
         static constexpr char const name[] = "a string";
     };
 
-    template <> struct parser_for<short> {
-        using parser = boost::spirit::x3::int_parser<short>;
+    template <std::signed_integral T> struct parser_for<T> {
+        using parser = boost::spirit::x3::int_parser<T>;
+        using rule_type = T;
         static constexpr char const name[] = "an integer";
     };
 
-    template <> struct parser_for<unsigned short> {
-        using parser = boost::spirit::x3::int_parser<unsigned short>;
+    template <std::unsigned_integral T> struct parser_for<T> {
+        using parser = boost::spirit::x3::int_parser<T>;
+        using rule_type = T;
         static constexpr char const name[] = "a positive integer";
     };
 
-    template <> struct parser_for<unsigned int> {
-        using parser = boost::spirit::x3::int_parser<unsigned int>;
-        static constexpr char const name[] = "a positive integer";
+    template <typename... Ts> struct parser_for<std::variant<Ts...>> {
+        using parser = parser::variant_parser<typename parser_for<Ts>::parser...>;
+        using rule_type = std::variant<Ts...>;
+        static constexpr char const name[] = "a value";
     };
 
-    template <> struct parser_for<int> {
-        using parser = boost::spirit::x3::int_parser<int>;
-        static constexpr char const name[] = "an integer";
-    };
-
-    template <> struct parser_for<long> {
-        using parser = boost::spirit::x3::int_parser<long>;
-        static constexpr char const name[] = "an integer";
-    };
-
-    template <> struct parser_for<unsigned long> {
-        using parser = boost::spirit::x3::int_parser<unsigned long>;
-        static constexpr char const name[] = "a positive integer";
-    };
-
-    template <> struct parser_for<long long> {
-        using parser = boost::spirit::x3::int_parser<long long>;
-        static constexpr char const name[] = "an integer";
-    };
-
-    template <> struct parser_for<unsigned long long> {
-        using parser = boost::spirit::x3::int_parser<unsigned long long>;
-        static constexpr char const name[] = "a positive integer";
+    template <typename... Ts> struct parser_for<std::tuple<Ts...>> {
+        using parser =
+            parser::tuple_parser<typename parser_for<Ts>::parser...>;
+        using rule_type = std::tuple<Ts...>;
+        static constexpr char const name[] = "a list of values";
     };
 
     template <typename T>
     struct config_real_policies : boost::spirit::x3::real_policies<T> {};
 
-    template <> struct parser_for<float> {
+    template <std::floating_point T> struct parser_for<T> {
         using parser =
             boost::spirit::x3::real_parser<float, config_real_policies<float>>;
-        static constexpr char const name[] = "a decimal number";
-    };
-
-    template <> struct parser_for<double> {
-        using parser =
-            boost::spirit::x3::real_parser<double,
-                                           config_real_policies<double>>;
-        static constexpr char const name[] = "a decimal number";
-    };
-
-    template <> struct parser_for<long double> {
-        using parser =
-            boost::spirit::x3::real_parser<long double,
-                                           config_real_policies<long double>>;
+        using rule_type = T;
         static constexpr char const name[] = "a decimal number";
     };
 
@@ -134,12 +110,16 @@ namespace sk::config::detail {
     auto make_member_parser(V T::*const member) {
         namespace x3 = boost::spirit::x3;
 
-        static typename parser_for<V>::parser parser;
-        static auto rule = member_rule<V>(parser_for<V>::name, parser);
+        using rule_type = typename parser_for<V>::rule_type;
+        using parser_type = typename parser_for<V>::parser;
+
+        static parser_type parser;
+        static auto rule = member_rule<rule_type>(parser_for<V>::name, parser);
 
         return x3::expect[rule][propagate(member)];
     }
 
+#if 0
     template <typename T, typename V>
     auto make_member_parser(std::vector<V> T::*const member) {
         namespace x3 = boost::spirit::x3;
@@ -152,8 +132,9 @@ namespace sk::config::detail {
 
         return x3::expect[rule][propagate(member)];
     }
+#endif
 
-    template < typename T, typename V>
+    template <typename T, typename V>
     auto make_member_parser(std::list<V> T::*const member) {
         namespace x3 = boost::spirit::x3;
 

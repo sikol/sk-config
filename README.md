@@ -128,32 +128,87 @@ user "scott" {
 `sk-config` requires a parser for each type used in the configuration file.
 Parsers are provided for most common built-in types and STL containers.
 
-### Numeric types
+Due to how Spirit works, parsing into `std::any` (or similar types) is _not_
+supported; the parser needs to know ahead of time what type(s) are being
+parsed, and cannot enumerate all parsable types.
 
-The standard Spirit parsers are used for `short`, `int`, `long`, `long long`
-(and their unsigned versions), `float`, `double`, and `long double`.  
-Numbers must be in base 10.  Floating-point types also accept integers.
+### Integers
+
+Any type that meets the requirements of `std::integral` is parsed using the
+standard Spirit integer parser.  Numbers must be in base 10, and base prefixes
+(`0x`, `0`) are not supported.  (This may be improved in the future.)
+
+Examples:
+* `opt 1;`
+* `opt -42;`
+
+### Real numbers
+
+Any type that meets the requirements of `std::floating_point` is parsed using
+the standard Spirit real number parser.  Leading and trailing dots are both
+supported, and integers are accepted, so `42` can be parsed as `42.0`.
+
+Examples:
+* `opt 42.5;`
+* `opt -.333;`
+* `opt 2;`
+
+### Booleans
+
+`bool` is parsed differently from other types since it has no value.  Instead,
+specifying the value is treated as `true`.
+
+Example:
+* `my-option;`
 
 ### Strings
 
-`std::string` can be parsed in one of two ways:
+`std::basic_string` can be parsed as either a quoted or unquoted string.  
 
-* An unquoted string, which is an alphabetic character followed by alphanumeric
-  characters, `-` or `_`.  For example, `astring`, `a_string` or `a-string`.
-* A quoted string, which is a string enclosed in single quotes or double quotes.
-  Escape characters `\t` or `\n` are supported.  For example, `'a long string'`,
-  `"string\twith\ttabs"`, `"string with an embedded \" quote mark"`.
+Quoted strings can be delimited with either `'` or `"`, and support C-style 
+embedded escape sequences.  Unquoted strings have similar rules to C
+identifiers: an alphabetic character followed by alphanumeric characters,
+`-` or `_`.
 
-## `std::vector<T>`, `std::deque<T>`, `std::list<T>`
+Examples:
 
-Single-value container types are parsed as a comma-separated list of `T`, where 
-`T` must have a valid parser.  For example, `std::vector<int>` could parse 
-`1, 42, 666`.  Duplicate values in the configuration file will create duplicate
-entries in the vector.
+* `opt some-string;`
+* `opt 'longer string with spaces';
+* `opt "a \"string\" with a newline\n in it\n";`
 
-## `std::set<T>`, `std::unordered_set<T>`
+### Lists
 
-As above, except that duplicate values raise an error.
+Most standard container types can be parsed as comma-separated lists:
+
+* `std::vector<T>`
+* `std::deque<T>`
+* `std::list<T>`
+* `std::set<T>`
+* `std::unordered_set<T>`
+
+`T` must be a supported type.
+
+For the set types, duplicate values will raise an error.
+
+Examples:
+
+* `opt 1, 42, 666;`
+* `opt 42, 'a string';  # List of variant<int,std::string>`
+* `opt 1, 1, 2; # Error if parsing into set<> or unordered_set<>`
+
+### std::variant
+
+`std::variant<Ts...>` is parsed as a single value.  All types in `Ts`
+must be supported types.
+
+Due to a quirk of the parser, `Ts` should not contain both integral and
+floating-point types (for example, `variant<int,float>`) or parsing will
+not working correctly.
+
+### std::tuple
+
+`std::tuple<Ts...>` is parsed as a comma-separated list of its contained
+types.  All types in `Ts` must be supported types.
 
 ## API usage
 

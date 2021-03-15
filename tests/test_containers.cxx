@@ -189,3 +189,75 @@ int-value 42;
 )",
                                      grammar, c));
 }
+
+TEST_CASE("variant<int,string> is int") {
+    namespace cr = sk::config::parser;
+
+    struct test_config {
+        std::variant<int, std::string> v;
+    };
+
+    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+    test_config c;
+    sk::config::parse("v 5;", grammar, c);
+    REQUIRE(get<int>(c.v) == 5);
+}
+
+TEST_CASE("variant<int,string> is string") {
+    namespace cr = sk::config::parser;
+
+    struct test_config {
+        std::variant<int, std::string> v;
+    };
+
+    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+    test_config c;
+    sk::config::parse("v 'testing';", grammar, c);
+    REQUIRE(get<std::string>(c.v) == "testing");
+}
+
+#if 0 // Broken
+TEST_CASE("variant<float,int>") {
+    namespace cr = sk::config::parser;
+
+    struct test_config {
+        std::variant<float, int> v1;
+        std::variant<float, int> v2;
+    };
+
+    auto grammar = cr::config<test_config>(
+        cr::option("v1", &test_config::v1),
+        cr::option("v2", &test_config::v2));
+
+    test_config c;
+    try {
+
+        sk::config::parse("v1 42; v2 42.0;", grammar, c);
+    } catch (sk::config::parse_error const &e) {
+        std::cerr << e;
+    }
+    REQUIRE(get<int>(c.v1) == 42);
+    REQUIRE(get<float>(c.v2) == 42.0f);
+}
+#endif
+
+TEST_CASE("tuple<>") {
+    namespace cr = sk::config::parser;
+
+    struct test_config {
+        std::tuple<int, std::string, float> v;
+    };
+
+    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+
+    test_config c;
+    try {
+
+        sk::config::parse("v 42, 'test string', 1.5;", grammar, c);
+    } catch (sk::config::parse_error const &e) {
+        std::cerr << e;
+    }
+    REQUIRE(get<0>(c.v) == 42);
+    REQUIRE(get<1>(c.v) == "test string");
+    REQUIRE(get<2>(c.v) == Approx(1.5));
+}
