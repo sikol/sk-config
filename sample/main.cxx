@@ -52,7 +52,7 @@ struct user {
 struct group {
     std::string name;
     int gid;
-    std::vector<std::string> members;
+    std::set<std::string> members;
 };
 
 struct config {
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
     for (auto &&group : loaded_config.groups) {
         fmt::print("\t{}: gid={}, members=", group.name, group.gid);
         std::ranges::copy(group.members,
-                          std::ostream_iterator<std::string>(std::cout));
+                          std::ostream_iterator<std::string>(std::cout, " "));
     }
 
     return 0;

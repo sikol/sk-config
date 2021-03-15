@@ -56,7 +56,7 @@ target_sources(sk-config PRIVATE
 	include/sk/config/detail/propagate.hxx
 	include/sk/config/detail/make_member_parser.hxx
 	include/sk/config/parser/list.hxx
- "include/sk/config/detail/error_formatter.hxx" "include/sk/config/error_detail.hxx")
+ "include/sk/config/detail/error_formatter.hxx" "include/sk/config/error_detail.hxx" )
 
 target_include_directories(sk-config INTERFACE include)
 target_compile_features(sk-config INTERFACE cxx_std_20)

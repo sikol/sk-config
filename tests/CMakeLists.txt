@@ -29,6 +29,8 @@ cmake_minimum_required(VERSION 3.12)
 add_executable(test_sk_config 
 	main.cxx
 	test_parse.cxx
+	test_type_parsers.cxx
+	test_containers.cxx
 )
 target_link_libraries(test_sk_config PRIVATE sk-config Catch2::Catch2)
 

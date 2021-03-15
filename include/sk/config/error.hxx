@@ -67,6 +67,9 @@ namespace sk::config {
             : error(std::move(message)), errors(std::move(errors_)) {}
     };
 
+    // An error occurred at the given iterator position.  This is usually
+    // caused in parse() and not returned to the user.
+
     inline auto operator<<(std::ostream &strm, parse_error const &p)
         -> std::ostream & {
 

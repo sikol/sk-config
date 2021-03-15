@@ -35,15 +35,16 @@
 
 namespace sk::config::parser {
 
+    // std::vector<T> attribute
     template <typename T>
-    struct list_parser : boost::spirit::x3::parser<list_parser<T>> {
+    struct vector_parser : boost::spirit::x3::parser<vector_parser<T>> {
         typedef std::vector<typename T::attribute_type> attribute_type;
         static bool const has_attribute = true;
 
-        template <typename Iterator, typename Context>
+        template <typename Iterator, typename Context, typename Attribute>
         bool parse(Iterator &first, Iterator const &last,
                    Context const &context, boost::spirit::x3::unused_type,
-                   attribute_type &attr) const {
+                   Attribute &attr) const {
             namespace x3 = boost::spirit::x3;
 
             static T parser;

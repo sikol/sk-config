@@ -29,7 +29,11 @@
 #ifndef SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
 #define SK_CONFIG_DETAIL_MAKE_MEMBER_PARSER_HXX_INCLUDED
 
+#include <list>
+#include <set>
 #include <vector>
+#include <deque>
+#include <unordered_set>
 
 #include <boost/spirit/home/x3.hpp>
 
@@ -44,11 +48,6 @@ namespace sk::config::detail {
 
     template <typename T> struct parser_for {
         // using parser = void;
-    };
-
-    template <typename T> struct parser_for<std::vector<T>> {
-        using parser = parser::list_parser<typename parser_for<T>::parser>;
-        static constexpr char const name[] = "a list of values";
     };
 
     template <> struct parser_for<std::string> {
@@ -137,6 +136,71 @@ namespace sk::config::detail {
 
         static typename parser_for<V>::parser parser;
         static auto rule = member_rule<V>(parser_for<V>::name, parser);
+
+        return x3::expect[rule][propagate(member)];
+    }
+
+    template <typename T, typename V>
+    auto make_member_parser(std::vector<V> T::*const member) {
+        namespace x3 = boost::spirit::x3;
+
+        using value_parser = typename parser_for<V>::parser;
+        auto value_name = parser_for<V>::name;
+
+        static parser::vector_parser<value_parser> parser;
+        static auto rule = member_rule<std::vector<V>>(value_name, parser);
+
+        return x3::expect[rule][propagate(member)];
+    }
+
+    template < typename T, typename V>
+    auto make_member_parser(std::list<V> T::*const member) {
+        namespace x3 = boost::spirit::x3;
+
+        using value_parser = typename parser_for<V>::parser;
+        auto value_name = parser_for<V>::name;
+
+        static parser::vector_parser<value_parser> parser;
+        static auto rule = member_rule<std::vector<V>>(value_name, parser);
+
+        return x3::expect[rule][propagate(member)];
+    }
+
+    template <typename T, typename V>
+    auto make_member_parser(std::deque<V> T::*const member) {
+        namespace x3 = boost::spirit::x3;
+
+        using value_parser = typename parser_for<V>::parser;
+        auto value_name = parser_for<V>::name;
+
+        static parser::vector_parser<value_parser> parser;
+        static auto rule = member_rule<std::vector<V>>(value_name, parser);
+
+        return x3::expect[rule][propagate(member)];
+    }
+
+    template <typename T, typename V>
+    auto make_member_parser(std::unordered_set<V> T::*const member) {
+        namespace x3 = boost::spirit::x3;
+
+        using value_parser = typename parser_for<V>::parser;
+        auto value_name = parser_for<V>::name;
+
+        static parser::vector_parser<value_parser> parser;
+        static auto rule = member_rule<std::vector<V>>(value_name, parser);
+
+        return x3::expect[rule][propagate(member)];
+    }
+
+    template <typename T, typename V>
+    auto make_member_parser(std::set<V> T::*const member) {
+        namespace x3 = boost::spirit::x3;
+
+        using value_parser = typename parser_for<V>::parser;
+        auto value_name = parser_for<V>::name;
+
+        static parser::vector_parser<value_parser> parser;
+        static auto rule = member_rule<std::vector<V>>(value_name, parser);
 
         return x3::expect[rule][propagate(member)];
     }

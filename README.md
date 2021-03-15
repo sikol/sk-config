@@ -122,6 +122,38 @@ user "scott" {
 };
 ```
 
+## Parsers
+
+`sk-config` requires a parser for each type used in the configuration file.
+Parsers are provided for most common types.  
+
+### Numeric types
+
+Parsers are provided for `short`, `int`, `long`, `long long` and their unsigned
+versions, `float`, `double`, and `long double`.  Numbers must be in base 10.
+Floating-point types accept either integers or decimal numbers in the form
+`.0`, `0.` or `0.0`.
+
+### Strings
+
+`std::string` can be parsed in one of two ways:
+
+* A base string, consisting of an alphabetic character followed by alphanumeric
+  characters, `-` or `_`.  For example, `astring`, `a_string` or `a-string`.
+* A quoted string, which is a string enclosed in single quotes or double quotes,
+  with embedded escape characters `\t` or `\n`.  For example, `'a long string'`,
+  `"string\twith\ttabs"`, `"string with an embedded \" quote mark"`.
+
+## std::vector<T>, std::deque<T>, std::list<T>
+
+Single-value container types are parsed as a comma-separated list of `T`, where 
+`T` must have a valid parser.  For example `std::vector<int>` could parse 
+`1, 42, 666`.  Duplicate values will create duplicate entries in the vector.
+
+## std::set<T>, std::unordered_set<T>
+
+As above, except that specifying duplicate values raises an error.
+
 ## API usage
 
 There are three basic types used to create a parser:
