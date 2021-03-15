@@ -5,18 +5,19 @@
 Features:
 
 * Parses the widely-used `named`-style configuration file format which is 
-  easy for humans to read and write and familiar to users.
+  easy for humans to understand and familiar to users.
+* Parse configuration data directly into STL containers and user-defined
+  structs.
 * Useful, human-readable error reporting:
 ```
-line 9: expected a string
-      group 0 {};
+in .\sample\sample1.conf, line 10: expected a string
+      group 0 {
 here -------^
 ```
-* Simple API abstracts away the details of Spirit for most parsers, but
-  provides full to the underlying Spirit parser if desired.
-* Parse collections of data directly into STL containers.
+* Simple API abstracts away the details of Spirit for most parsers.
+* ... but provides full to the underlying Spirit parser if desired.
 * Dynamically-generated parser can be extended to support any data type,
-  including user-defined types, or even embed complete sub-parsers.
+  including user-defined types, or even embed complete Spirit sub-parsers.
 
 **WARNING**: This library is still in development and almost certainly
 contains bugs; if you find any, please file an issue or a PR.
@@ -122,37 +123,37 @@ user "scott" {
 };
 ```
 
-## Parsers
+## Supported types
 
 `sk-config` requires a parser for each type used in the configuration file.
-Parsers are provided for most common types.  
+Parsers are provided for most common built-in types and STL containers.
 
 ### Numeric types
 
-Parsers are provided for `short`, `int`, `long`, `long long` and their unsigned
-versions, `float`, `double`, and `long double`.  Numbers must be in base 10.
-Floating-point types accept either integers or decimal numbers in the form
-`.0`, `0.` or `0.0`.
+The standard Spirit parsers are used for `short`, `int`, `long`, `long long`
+(and their unsigned versions), `float`, `double`, and `long double`.  
+Numbers must be in base 10.  Floating-point types also accept integers.
 
 ### Strings
 
 `std::string` can be parsed in one of two ways:
 
-* A base string, consisting of an alphabetic character followed by alphanumeric
+* An unquoted string, which is an alphabetic character followed by alphanumeric
   characters, `-` or `_`.  For example, `astring`, `a_string` or `a-string`.
-* A quoted string, which is a string enclosed in single quotes or double quotes,
-  with embedded escape characters `\t` or `\n`.  For example, `'a long string'`,
+* A quoted string, which is a string enclosed in single quotes or double quotes.
+  Escape characters `\t` or `\n` are supported.  For example, `'a long string'`,
   `"string\twith\ttabs"`, `"string with an embedded \" quote mark"`.
 
-## std::vector<T>, std::deque<T>, std::list<T>
+## `std::vector<T>`, `std::deque<T>`, `std::list<T>`
 
 Single-value container types are parsed as a comma-separated list of `T`, where 
-`T` must have a valid parser.  For example `std::vector<int>` could parse 
-`1, 42, 666`.  Duplicate values will create duplicate entries in the vector.
+`T` must have a valid parser.  For example, `std::vector<int>` could parse 
+`1, 42, 666`.  Duplicate values in the configuration file will create duplicate
+entries in the vector.
 
-## std::set<T>, std::unordered_set<T>
+## `std::set<T>`, `std::unordered_set<T>`
 
-As above, except that specifying duplicate values raises an error.
+As above, except that duplicate values raise an error.
 
 ## API usage
 
