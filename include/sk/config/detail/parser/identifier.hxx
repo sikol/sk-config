@@ -26,17 +26,17 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_PARSER_QSTRING_HXX_INCLUDED
-#define SK_CONFIG_PARSER_QSTRING_HXX_INCLUDED
+#ifndef SK_CONFIG_PARSER_IDENTIFIER_HXX_INCLUDED
+#define SK_CONFIG_PARSER_IDENTIFIER_HXX_INCLUDED
 
 #include <string>
 
 #include <boost/spirit/home/x3.hpp>
 
-namespace sk::config::parser {
+namespace sk::config::detail::parser {
 
     template <typename Char>
-    struct qstring_parser : boost::spirit::x3::parser<qstring_parser<Char>> {
+    struct identifier : boost::spirit::x3::parser<identifier<Char>> {
         typedef std::basic_string<Char> attribute_type;
         static bool const has_attribute = true;
 
@@ -46,69 +46,12 @@ namespace sk::config::parser {
                    attribute_type &attr) const {
             namespace x3 = boost::spirit::x3;
 
-            // Run the skip parser.
-            x3::skip_over(first, last, context);
+            static auto const grammar =
+                x3::lexeme[x3::ascii::alpha >>
+                           *(x3::ascii::alnum | x3::char_('-') |
+                             x3::char_('_'))];
 
-            // No input?
-            if (first == last)
-                return false;
-
-            // A string should start with ' or ".
-            char start = *first;
-            if (start != '\'' and start != '"')
-                return false;
-
-            ++first;
-
-            // Parse the string.
-            attr = "";
-            bool in_escape = false;
-
-            do {
-                if (first == last)
-                    // Reached end of input and no closing quote.
-                    return false;
-
-                if (not in_escape and (*first == start)) {
-                    // Got closing quote.
-                    ++first;
-                    break;
-                }
-
-                if (in_escape) {
-                    in_escape = false;
-
-                    if (*first == start) {
-                        // Escaped quote character.
-                        attr += start;
-                        continue;
-                    }
-
-                    switch (*first) {
-                    case 't':
-                        attr += '\t';
-                        break;
-                    case 'n':
-                        attr += '\n';
-                        break;
-                    case '\\':
-                        attr += '\\';
-                        break;
-                    default:
-                        // Unrecognised string escape.
-                        return false;
-                    }
-
-                    continue;
-                }
-
-                if (*first == '\\')
-                    in_escape = true;
-                else
-                    attr += *first;
-            } while (++first, true);
-
-            return true;
+            return grammar.parse(first, last, context, x3::unused, attr);
         }
 
         template <typename Iterator, typename Context, typename Attribute>
@@ -124,6 +67,19 @@ namespace sk::config::parser {
         }
     };
 
-} // namespace sk::config::parser
+} // namespace sk::config::detail::parser
 
-#endif // SK_CONFIG_PARSER_QSTRING_HXX_INCLUDED
+namespace boost::spirit::x3 {
+
+    template <typename Char>
+    struct get_info<sk::config::detail::parser::identifier<Char>> {
+        typedef std::string result_type;
+        result_type
+        operator()(sk::config::detail::parser::identifier<Char> const &) const {
+            return "identifier";
+        }
+    };
+
+} // namespace boost::spirit::x3
+
+#endif // SK_CONFIG_PARSER_IDENTIFIER_HXX_INCLUDED

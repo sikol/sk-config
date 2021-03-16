@@ -45,10 +45,7 @@ endif()
 add_library(sk-config INTERFACE)
 
 target_sources(sk-config PRIVATE 
-	include/sk/config/parser/qstring.hxx
-	include/sk/config/parser/identifier.hxx
 	include/sk/config/parser/string.hxx
-	
 	include/sk/config/parser/tuple.hxx
 	include/sk/config/parser/numeric.hxx
 	include/sk/config/parser/vector.hxx
@@ -61,8 +58,13 @@ target_sources(sk-config PRIVATE
 	include/sk/config/detail/propagate.hxx
 	include/sk/config/detail/make_member_parser.hxx
 	include/sk/config/detail/error_formatter.hxx
+	include/sk/config/detail/parser/qstring.hxx
+	include/sk/config/detail/parser/identifier.hxx
+	include/sk/config/detail/parser/heredoc.hxx
 	include/sk/config/detail/parser/vector.hxx
 	include/sk/config/detail/parser/comment.hxx
+	include/sk/config/detail/parser/option_terminator.hxx
+	include/sk/config/detail/parser/option_separator.hxx
 	include/sk/config/detail/rule.hxx
 
 	include/sk/config/parse.hxx
@@ -72,8 +74,9 @@ target_sources(sk-config PRIVATE
 	include/sk/config/config.hxx
 	include/sk/config/block.hxx
 	include/sk/config/option.hxx
+	include/sk/config/parser_policy.hxx
 	include/sk/config.hxx
- "include/sk/config/parser_policy.hxx" "include/sk/config/detail/parser/option_terminator.hxx" "include/sk/config/detail/parser/option_separator.hxx")
+)
 
 target_include_directories(sk-config INTERFACE include)
 target_compile_features(sk-config INTERFACE cxx_std_20)

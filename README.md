@@ -237,18 +237,26 @@ Example:
 
 ### Strings
 
-`std::basic_string` can be parsed as either a quoted or unquoted string.  
+`std::basic_string` can be parsed in three ways:
 
-Quoted strings can be delimited with either `'` or `"`, and support C-style 
-embedded escape sequences.  Unquoted strings have similar rules to C
-identifiers: an alphabetic character followed by alphanumeric characters,
-`-` or `_`.
+* An unquoted string, which is an alphabetic character followed by alphanumeric
+  characters, `-` or `_`.
+* A quoted string delimited with either `'` or `"`, with C-style embedded escape
+  sequences.  
+* A heredoc, starting with `<<<TOKEN` and terminated with `TOKEN`, where `TOKEN`
+  can by any valid identifier.
 
 Examples:
 
 * `opt some-string;`
 * `opt 'longer string with spaces';`
 * `opt "a \"string\" with a newline\n in it\n";`
+* ```
+opt <<<END
+    This is a long string which can contain 
+    embedded newlines.
+END;
+```
 
 ### Lists
 

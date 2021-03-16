@@ -33,50 +33,77 @@
 #include <stdexcept>
 #include <string>
 
-#include <sk/config/parser/string.hxx>
-#include <sk/config/option.hxx>
 #include <sk/config/config.hxx>
+#include <sk/config/option.hxx>
 #include <sk/config/parse.hxx>
+#include <sk/config/parser/string.hxx>
 
 TEST_CASE("bare string") {
-    namespace cr = sk::config;
+    namespace cfg = sk::config;
 
     struct test_config {
         std::string v;
     };
 
-    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+    auto grammar = cfg::config<test_config>(cfg::option("v", &test_config::v));
     test_config c;
-    sk::config::parse("v bare-string;", grammar, c);
+    cfg::parse("v bare-string;", grammar, c);
     REQUIRE(c.v == "bare-string");
 }
 
 TEST_CASE("single-quoted string string") {
-    namespace cr = sk::config;
+    namespace cfg = sk::config;
 
     struct test_config {
         std::string v;
     };
 
-    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+    auto grammar = cfg::config<test_config>(cfg::option("v", &test_config::v));
     test_config c;
-    sk::config::parse(
+    cfg::parse(
         "v 'a string with \\t tab \\n newline \\' quote \\\\ backslash';",
         grammar, c);
     REQUIRE(c.v == "a string with \t tab \n newline ' quote \\ backslash");
 }
 
 TEST_CASE("double-quoted string") {
-    namespace cr = sk::config;
+    namespace cfg = sk::config;
 
     struct test_config {
         std::string v;
     };
 
-    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+    auto grammar = cfg::config<test_config>(cfg::option("v", &test_config::v));
     test_config c;
-    sk::config::parse(
+    cfg::parse(
         "v \"a string with \\t tab \\n newline \\\" quote \\\\ backslash\";",
         grammar, c);
     REQUIRE(c.v == "a string with \t tab \n newline \" quote \\ backslash");
+}
+
+TEST_CASE("heredoc") {
+    namespace cfg = sk::config;
+
+    struct test_config {
+        std::string v;
+    };
+
+    auto grammar = cfg::config<test_config>(cfg::option("v", &test_config::v));
+    test_config c;
+
+    try {
+        cfg::parse(
+            R"(
+v <<<END
+This is a long string which can have
+embedded newlines.
+END;
+)",
+            grammar, c);
+
+    } catch (cfg::parse_error const &e) {
+        std::cerr << e;
+    }
+
+    REQUIRE(c.v == "This is a long string which can have\nembedded newlines.");
 }

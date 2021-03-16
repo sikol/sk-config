@@ -29,16 +29,9 @@
 #ifndef SK_CONFIG_DETAIL_RULE_HXX_INCLUDED
 #define SK_CONFIG_DETAIL_RULE_HXX_INCLUDED
 
-#include <string>
-
 #include <boost/spirit/home/x3.hpp>
-#include <boost/spirit/home/x3/support/utility/error_reporting.hpp>
 
-#include <sk/config/detail/make_member_parser.hxx>
-#include <sk/config/detail/propagate.hxx>
 #include <sk/config/error.hxx>
-#include <sk/config/parser/identifier.hxx>
-#include <sk/config/parser/qstring.hxx>
 
 namespace sk::config::detail {
 

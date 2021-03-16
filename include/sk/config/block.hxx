@@ -52,7 +52,7 @@ namespace sk::config {
 
         auto do_nothing = [&](auto &) {};
         auto parser = x3::as_parser(label)            //
-                      >> ('{'                         //
+                      > -('{'                         //
                           > member_parser[do_nothing] //
                           > '}')                      //
                       > x3::no_skip[detail::parser::option_terminator];
@@ -67,11 +67,11 @@ namespace sk::config {
         auto member_parser = *(... | std::forward<Members>(members));
 
         auto do_nothing = [&](auto &) {};
-        auto parser = x3::as_parser(label)                //
-                      >> detail::make_member_parser(name) //
-                      >> ('{'                             //
-                          > member_parser[do_nothing]     //
-                          > '}')                          //
+        auto parser = x3::as_parser(label)               //
+                      > detail::make_member_parser(name) //
+                      > -('{'                            //
+                          > member_parser[do_nothing]    //
+                          > '}')                         //
                       > x3::no_skip[detail::parser::option_terminator];
         return detail::rule<U>(label, parser)[detail::propagate(mm)];
     }

@@ -26,40 +26,64 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_PARSER_ANY_STRING_HXX_INCLUDED
-#define SK_CONFIG_PARSER_ANY_STRING_HXX_INCLUDED
+#ifndef SK_CONFIG_DETAIL_PARSER_HEREDOC_HXX_INCLUDED
+#define SK_CONFIG_DETAIL_PARSER_HEREDOC_HXX_INCLUDED
 
 #include <string>
 
-#include <boost/spirit/home/x3/core/parser.hpp>
-#include <boost/spirit/home/x3/operator/alternative.hpp>
-#include <boost/spirit/home/x3/support/unused.hpp>
+#include <boost/spirit/home/x3.hpp>
 
 #include <sk/config/detail/parser/identifier.hxx>
-#include <sk/config/detail/parser/qstring.hxx>
-#include <sk/config/detail/parser/heredoc.hxx>
-#include <sk/config/parser_for.hxx>
 
-namespace sk::config::parser {
+namespace sk::config::detail::parser {
+
     template <typename Char>
-    struct any_string_parser
-        : boost::spirit::x3::parser<any_string_parser<Char>> {
+    struct heredoc : boost::spirit::x3::parser<heredoc<Char>> {
         typedef std::basic_string<Char> attribute_type;
         static bool const has_attribute = true;
 
         template <typename Iterator, typename Context>
         bool parse(Iterator &first, Iterator const &last,
-                   Context const &context, boost::spirit::x3::unused_type,
+                   Context const &context,
+                   boost::spirit::x3::unused_type unused_,
                    attribute_type &attr) const {
             namespace x3 = boost::spirit::x3;
 
-            static const detail::parser::identifier<Char> identifier;
-            static const detail::parser::qstring<Char> qstring;
-            static const detail::parser::heredoc<Char> heredoc;
+            // Run the skip parser.
+            x3::skip_over(first, last, context);
 
-            static auto const grammar = identifier | qstring | heredoc;
+            // No input?
+            if (first == last)
+                return false;
 
-            return grammar.parse(first, last, context, x3::unused, attr);
+            // Parse the opening <<<
+            auto const open_parser = x3::lit("<<<");
+
+            x3::unused_type unused;
+            if (!open_parser.parse(first, last, context, unused, unused))
+                return false;
+
+            // Now we must have a heredoc, or we raise a syntax error.
+
+            // Parse the identifier.
+            auto const ident = identifier<Char>();
+            std::basic_string<Char> token;
+
+            auto const token_parser = x3::expect[x3::no_skip[ident > x3::eol]];
+
+            if (!token_parser.parse(first, last, context, unused, token))
+                return false;
+
+            // Parse the content into our attribute, terminated by the token.
+            auto lit_token = x3::eol >> x3::lit(token);
+            auto content_parser =                        //
+                x3::expect[                              //
+                    x3::no_skip[+(x3::char_ - lit_token) //
+                                > lit_token]];
+            if (!content_parser.parse(first, last, context, unused, attr))
+                return false;
+
+            return true;
         }
 
         template <typename Iterator, typename Context, typename Attribute>
@@ -75,16 +99,19 @@ namespace sk::config::parser {
         }
     };
 
-} // namespace sk::config::parser
+} // namespace sk::config::detail::parser
 
-namespace sk::config {
+namespace boost::spirit::x3 {
 
-    template <typename Char> struct parser_for<std::basic_string<Char>> {
-        using parser_type = parser::any_string_parser<Char>;
-        using rule_type = std::basic_string<Char>;
-        static constexpr char const name[] = "a string";
+    template <typename Char>
+    struct get_info<sk::config::detail::parser::heredoc<Char>> {
+        typedef std::string result_type;
+        result_type
+        operator()(sk::config::detail::parser::heredoc<Char> const &) const {
+            return "heredoc";
+        }
     };
 
-} // namespace sk::config
+} // namespace boost::spirit::x3
 
-#endif // SK_CONFIG_PARSER_ANY_STRING_HXX_INCLUDED
+#endif // SK_CONFIG_DETAIL_PARSER_HEREDOC_HXX_INCLUDED
