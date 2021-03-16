@@ -251,7 +251,8 @@ Examples:
 * `opt some-string;`
 * `opt 'longer string with spaces';`
 * `opt "a \"string\" with a newline\n in it\n";`
-* ```
+
+```
 opt <<<END
     This is a long string which can contain 
     embedded newlines.
