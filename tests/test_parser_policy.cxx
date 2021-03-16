@@ -33,6 +33,7 @@
 #include <stdexcept>
 #include <string>
 
+#include <sk/config/block.hxx>
 #include <sk/config/config.hxx>
 #include <sk/config/option.hxx>
 #include <sk/config/parse.hxx>
@@ -48,22 +49,34 @@ TEST_CASE("custom option terminator") {
         }
     };
 
-    struct test_config {
+    struct test_block {
         int a, b;
     };
 
-    auto grammar = cfg::config<test_config>(cfg::option("a", &test_config::a),
-                                            cfg::option("b", &test_config::b));
+    struct test_config {
+        test_block b;
+    };
+
+    auto grammar = cfg::config<test_config>(                     //
+        cfg::block<test_block>("test-block", &test_config::b,    //
+                               cfg::option("a", &test_block::a), //
+                               cfg::option("b", &test_block::b)));
 
     test_config c;
     try {
-        cfg::parse<newline_policy>("a 42\nb 666\n", grammar, c);
+        cfg::parse<newline_policy>(R"(
+test-block {
+    a 42
+    b 666
+}
+)",
+                                   grammar, c);
     } catch (cfg::parse_error const &e) {
         std::cout << e;
     }
 
-    REQUIRE(c.a == 42);
-    REQUIRE(c.b == 666);
+    REQUIRE(c.b.a == 42);
+    REQUIRE(c.b.b == 666);
 }
 
 TEST_CASE("custom option separator") {

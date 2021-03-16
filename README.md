@@ -164,7 +164,7 @@ This will parse configuration files that look like this:
 user "fred" {
     uid: 0
     full-name: "Fred Smith"
-};
+}
 ```
 
 ## Include files

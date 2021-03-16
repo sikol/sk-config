@@ -34,6 +34,7 @@
 #include <boost/spirit/home/x3.hpp>
 
 #include <sk/config/detail/make_member_parser.hxx>
+#include <sk/config/detail/parser/option_terminator.hxx>
 #include <sk/config/detail/propagate.hxx>
 #include <sk/config/detail/rule.hxx>
 
@@ -50,8 +51,11 @@ namespace sk::config {
         auto member_parser = *(... | std::forward<Members>(members));
 
         auto do_nothing = [&](auto &) {};
-        auto parser = x3::as_parser(label) >>
-                      ('{' > member_parser[do_nothing] > '}') > ';';
+        auto parser = x3::as_parser(label)            //
+                      >> ('{'                         //
+                          > member_parser[do_nothing] //
+                          > '}')                      //
+                      > x3::no_skip[detail::parser::option_terminator];
         return detail::rule<U>(label, parser)[detail::propagate(mm)];
     }
 
@@ -63,12 +67,15 @@ namespace sk::config {
         auto member_parser = *(... | std::forward<Members>(members));
 
         auto do_nothing = [&](auto &) {};
-        auto parser = x3::as_parser(label) >>
-                      detail::make_member_parser(name) >>
-                      ('{' > member_parser[do_nothing] > '}') > ';';
+        auto parser = x3::as_parser(label)                //
+                      >> detail::make_member_parser(name) //
+                      >> ('{'                             //
+                          > member_parser[do_nothing]     //
+                          > '}')                          //
+                      > x3::no_skip[detail::parser::option_terminator];
         return detail::rule<U>(label, parser)[detail::propagate(mm)];
     }
 
-} // namespace sk::config::parser
+} // namespace sk::config
 
 #endif // SK_CONFIG_BLOCK_HXX_INCLUDED
