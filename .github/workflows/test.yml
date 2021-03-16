@@ -105,14 +105,14 @@ jobs:
       id: cache-vcpkg
       uses: actions/cache@v2
       with:
-        path: ~/AppData/Local/vcpkg
+        path: ~/.cache/vcpkg
         key: x64-linux-gcc-vcpkg
 
     - name: Create build environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
     - name: Configure CMake
-      shell: cmd
+      shell: sh
       working-directory: ${{github.workspace}}/build
       run: |
         cmake -G Ninja                                                      \
@@ -127,13 +127,13 @@ jobs:
 
     - name: Build
       working-directory: ${{github.workspace}}/build
-      shell: cmd
+      shell: sh
       run: |
         cmake --build .
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      shell: cmd
+      shell: sh
       run: ctest -V
 
   x64_linux_clang:
@@ -148,14 +148,14 @@ jobs:
       id: cache-vcpkg
       uses: actions/cache@v2
       with:
-        path: ~/AppData/Local/vcpkg
+        path: ~/.cache/vcpkg
         key: x64-linux-clang-vcpkg
 
     - name: Create build environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
     - name: Configure CMake
-      shell: cmd
+      shell: sh
       working-directory: ${{github.workspace}}/build
       run: |
         cmake -G Ninja                                                      \
@@ -170,11 +170,11 @@ jobs:
 
     - name: Build
       working-directory: ${{github.workspace}}/build
-      shell: cmd
+      shell: sh
       run: |
         cmake --build .
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      shell: cmd
+      shell: sh
       run: ctest -V
