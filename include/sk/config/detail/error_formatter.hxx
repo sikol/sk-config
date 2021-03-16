@@ -63,12 +63,11 @@ namespace sk::config::detail {
 
         typedef void result_type;
 
-        void operator()(Iterator err_pos,
-                        std::string const &error_message) ;
+        void operator()(Iterator err_pos, std::string const &error_message);
         void operator()(Iterator err_first, Iterator err_last,
-                        std::string const &error_message) ;
+                        std::string const &error_message);
         void operator()(boost::spirit::x3::position_tagged pos,
-                        std::string const &message)  {
+                        std::string const &message) {
             auto where = pos_cache.position_of(pos);
             (*this)(where.begin(), where.end(), message);
         }
@@ -213,11 +212,13 @@ namespace sk::config::detail {
         Iterator first = pos_cache.first();
         Iterator last = pos_cache.last();
 
+        error_detail err;
+
         // make sure err_pos does not point to white space
         skip_whitespace(err_first, last);
 
         err.file = file;
-        err.line = position(err_pos);
+        err.line = position(err_first);
         err.message = error_message;
 
         Iterator start = get_line_start(first, err_first);
