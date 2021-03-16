@@ -229,11 +229,17 @@ Examples:
 
 ### Booleans
 
-`bool` is parsed differently from other types since it has no value.  Instead,
-specifying the option is treated as `true`.
+When used as a bare type, `bool` is parsed differently from other types
+since it has no value; instead, specifying the option is treated as `true`.
 
 Example:
 * `my-option;`
+
+When `bool` is part of a list of values (e.g. `std::tuple<>`) it must be
+written explicitly, in which case the values `true` and `false` are used.
+
+Example:
+* `my-option 42, true; # std::tuple<int,bool>`
 
 ### Strings
 
@@ -244,7 +250,7 @@ Example:
 * A quoted string delimited with either `'` or `"`, with C-style embedded escape
   sequences.  
 * A heredoc, starting with `<<<TOKEN` and terminated with `TOKEN`, where `TOKEN`
-  can by any valid identifier.
+  can be any valid identifier.
 
 Examples:
 

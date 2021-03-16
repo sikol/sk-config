@@ -76,7 +76,7 @@ target_sources(sk-config PRIVATE
 	include/sk/config/option.hxx
 	include/sk/config/parser_policy.hxx
 	include/sk/config.hxx
-)
+ "include/sk/config/detail/parser/bool.hxx")
 
 target_include_directories(sk-config INTERFACE include)
 target_compile_features(sk-config INTERFACE cxx_std_20)

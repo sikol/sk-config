@@ -80,3 +80,23 @@ TEST_CASE("3-tuple<>") {
     REQUIRE(get<1>(c.v) == "test string");
     REQUIRE(get<2>(c.v) == Approx(1.5));
 }
+
+TEST_CASE("tuple<int,bool>") {
+    namespace cr = sk::config;
+
+    struct test_config {
+        std::tuple<int, bool> v;
+    };
+
+    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+
+    test_config c;
+    try {
+        sk::config::parse("v 42, true;", grammar, c);
+    } catch (sk::config::parse_error const &e) {
+        std::cerr << e;
+    }
+
+    REQUIRE(get<0>(c.v) == 42);
+    REQUIRE(get<1>(c.v) == true);
+}

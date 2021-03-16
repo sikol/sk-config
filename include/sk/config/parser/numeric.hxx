@@ -31,13 +31,26 @@
 
 #include <concepts>
 
-#include <sk/config/parser_for.hxx>
-
 #include <boost/spirit/home/x3/numeric/int.hpp>
 #include <boost/spirit/home/x3/numeric/real.hpp>
 #include <boost/spirit/home/x3/numeric/uint.hpp>
 
+#include <sk/config/detail/parser/bool.hxx>
+#include <sk/config/parser_for.hxx>
+
 namespace sk::config {
+
+    /*
+     * bool is here because it's an std::unsigned_integral, so if we
+     * put it in its own header, anyone including numeric.hxx but not
+     * the bool header would incorrectly parse bool instead of creating
+     * a compile-time error.
+     */
+    template <> struct parser_for<bool> {
+        using parser_type = detail::parser::bool_parser;
+        using rule_type = bool;
+        static constexpr char const name[] = "a boolean";
+    };
 
     // signed_integral
     template <std::signed_integral T> struct parser_for<T> {
