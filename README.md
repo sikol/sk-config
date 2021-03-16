@@ -135,7 +135,8 @@ terminating options with a semicolon, we want to allow newline as a
 terminator.  We can express this policy like this:
 
 ```
-    using namespace x3 = boost::spirit::x3;
+    namespace x3 = boost::spirit::x3;
+    namespace cfg = sk::config;
 
     struct my_policy : cfg::parser_policy {
         // Change the parser that will be used to parse end-of-option.
@@ -154,7 +155,7 @@ terminator.  We can express this policy like this:
 Now we can use our custom policy when parsing:
 
 ```
-    parse<my_policy>(filename, grammar, ret);
+    cfg::parse<my_policy>(filename, grammar, ret);
 ```
 
 This will parse configuration files that look like this:

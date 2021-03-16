@@ -34,6 +34,8 @@
 
 #include <boost/spirit/home/x3.hpp>
 
+#include <sk/config/parser_policy.hxx>
+
 namespace sk::config::detail::parser {
 
     struct option_terminator_parser
