@@ -29,7 +29,7 @@ jobs:
       shell: cmd
       working-directory: ${{github.workspace}}/build
       run: |
-        call %VCVARS_PATH
+        call "%VCVARS_PATH%"
         cmake -G Ninja                                                      ^
             -DCMAKE_BUILD_TYPE=%BUILD_TYPE%                                 ^
             -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   ^
@@ -40,7 +40,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       shell: cmd
       run: |
-        call %VCVARS_PATH
+        call "%VCVARS_PATH%"
         cmake --build .
 
     - name: Test
