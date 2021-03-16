@@ -30,15 +30,15 @@ Given a configuration file like this:
 
 ```
 user "alice" {
-	password "letmein";
+    password "letmein";
 };
 
 user "bob" {
-	password "securepassword";
+    password "securepassword";
 };
 
 access {
-	allow alice, bob;
+    allow alice, bob;
 };
 ```
 
@@ -48,38 +48,38 @@ A parser can be created like this:
 #include <sk/config.hxx>
 
 struct user {
-	std::string name;
-	std::string password;
+    std::string name;
+    std::string password;
 };
 
 struct access_config {
-	std::vector<std::string> allow_users;
+    std::vector<std::string> allow_users;
 };
 
 struct config {
-	std::vector<user> users;
-	access_config access;
+    std::vector<user> users;
+    access_config access;
 };
 
 int main(int argc, char **argv) {
-	namespace cfg = sk::config;
+    namespace cfg = sk::config;
 
-	auto grammar = cfg::config<config>(
+    auto grammar = cfg::config<config>(
 
-		cfg::block<user>("user", &user::name, &config::users,
-			cfg::option("password", &user::password)),
+        cfg::block<user>("user", &user::name, &config::users,
+            cfg::option("password", &user::password)),
 
-		cfg::block<access_config>("access", &config::access,
-			cfg::option("allow", &access_config::allow_users))
-	);
+        cfg::block<access_config>("access", &config::access,
+            cfg::option("allow", &access_config::allow_users))
+    );
 
-	config loaded_config;
-	try {
-		cfg::parse_file(argv[1], grammar, loaded_config);
-	} catch (cfg::parse_error const &e) {
-		std::cerr << e;
-		return 1;
-	}
+    config loaded_config;
+    try {
+        cfg::parse_file(argv[1], grammar, loaded_config);
+    } catch (cfg::parse_error const &e) {
+        std::cerr << e;
+        return 1;
+    }
 }
 ```
 
@@ -119,8 +119,8 @@ sub-options are properties of the object.  For example:
 
 ```
 user "scott" {
-	password "tiger";
-	groups wheel, operator;
+    password "tiger";
+    groups wheel, operator;
 };
 ```
 
@@ -135,35 +135,34 @@ terminating options with a semicolon, we want to allow newline as a
 terminator.  We can express this policy like this:
 
 ```
-	using namespace x3 = boost::spirit::x3;
+    using namespace x3 = boost::spirit::x3;
 
     struct my_policy : cfg::parser_policy {
-		// Change the parser that will be used to parse end-of-option.
+        // Change the parser that will be used to parse end-of-option.
         auto option_terminator() const {
             return x3::eol;
         }
 
-		// Change the parser that will be expected between an option
-		// and its value.
-		auto option_separator() const {
+        // Change the parser that will be expected between an option
+        // and its value.
+        auto option_separator() const {
             return x3::lit(':');
         }
-
     };
 ```
 
 Now we can use our custom policy when parsing:
 
 ```
-	parse<my_policy>(filename, grammar, ret);
+    parse<my_policy>(filename, grammar, ret);
 ```
 
 This will parse configuration files that look like this:
 
 ```
 user "fred" {
-	uid: 0
-	full-name: "Fred Smith"
+    uid: 0
+    full-name: "Fred Smith"
 };
 ```
 
@@ -311,26 +310,26 @@ Could be parsed like this:
 
 ```c++
 struct test_config {
-	bool my_option;
+    bool my_option;
 };
 
 x3::symbols<bool> syms;
 syms.add("on", true)("off", false);
 // ...
-	cfg::option("my-option", &test_config::my_option, syms);
+    cfg::option("my-option", &test_config::my_option, syms);
 ```
 
 Symbols can also be used to parse a list of values:
 
 ```c++
 struct test_config {
-	std::vector<int> my_options;
+    std::vector<int> my_options;
 };
 
 x3::symbols<int> syms;
 syms.add("one", 1)("two", 2)("three", 3);
 // ...
-	cfg::option("my-option", &test_config::my_options, syms % ',');
+    cfg::option("my-option", &test_config::my_options, syms % ',');
 ```
 
 ```
