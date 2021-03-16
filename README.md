@@ -85,9 +85,14 @@ int main(int argc, char **argv) {
 
 ## Supported compilers
 
-`sk-config` is tested with MSVC 19.29 (VS 2019 16.10) and clang-cl 11.0.1
-using the Microsoft STL.  It should work with any reasonably-compliant
-compiler supporting C++20.
+`sk-config` is tested with:
+
+* MSVC 19.28 (VS 2019 16.9) on Windows
+* Clang 11.0.1 on Windows
+* Clang 11.0.1 on Linux
+* GCC 10.2 on Linux
+
+It should work with any reasonably-compliant compiler supporting C++20.
 
 ## Configuration file format
 
