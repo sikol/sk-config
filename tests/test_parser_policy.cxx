@@ -45,7 +45,7 @@ TEST_CASE("custom option terminator") {
     namespace x3 = boost::spirit::x3;
 
     struct newline_policy : cfg::parser_policy {
-        auto option_terminator() const {
+        static constexpr auto option_terminator() {
             return x3::eol;
         }
     };
@@ -85,7 +85,7 @@ TEST_CASE("custom option separator") {
     namespace x3 = boost::spirit::x3;
 
     struct newline_policy : cfg::parser_policy {
-        auto option_separator() const {
+        static constexpr auto option_separator() {
             return x3::lit('=');
         }
     };

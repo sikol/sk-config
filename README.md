@@ -140,13 +140,13 @@ terminator.  We can express this policy like this:
 
     struct my_policy : cfg::parser_policy {
         // Change the parser that will be used to parse end-of-option.
-        auto option_terminator() const {
+        static constexpr auto option_terminator() {
             return x3::eol;
         }
 
         // Change the parser that will be expected between an option
         // and its value.
-        auto option_separator() const {
+        static constexpr auto option_separator() {
             return x3::lit(':');
         }
     };
@@ -179,6 +179,7 @@ Core functionality:
 * `<sk/config/option.hxx>` - `option()` function
 * `<sk/config/block.hxx>` - `block()` function
 * `<sk/config/config.hxx>` - `config()` function
+* `<sk/config/parser_policy.hxx>` - `parser_policy` type
 
 Basic parsers:
 

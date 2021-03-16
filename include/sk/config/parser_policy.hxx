@@ -40,7 +40,7 @@ namespace sk::config {
          * The parser used to separate option names from their values.
          * By default this is eps, meaning no separator.
          */
-        auto option_separator() const {
+        static constexpr auto option_separator() {
             return boost::spirit::x3::eps;
         }
 
@@ -52,7 +52,7 @@ namespace sk::config {
          * This parser is always invoked with lexeme[], so it can match
          * whitespace.
          */
-        auto option_terminator() const {
+        static constexpr auto option_terminator() {
             return boost::spirit::x3::lit(';');
         }
 
