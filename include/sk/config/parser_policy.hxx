@@ -26,46 +26,25 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_PARSER_OPTION_HXX_INCLUDED
-#define SK_CONFIG_PARSER_OPTION_HXX_INCLUDED
+#ifndef SK_CONFIG_PARSER_POLICY_HXX_INCLUDED
+#define SK_CONFIG_PARSER_POLICY_HXX_INCLUDED
 
 #include <boost/spirit/home/x3.hpp>
 
-#include <sk/config/detail/make_member_parser.hxx>
-#include <sk/config/detail/parser/option_separator.hxx>
-#include <sk/config/detail/parser/option_terminator.hxx>
-
 namespace sk::config {
 
-    template <typename T, typename V, typename Parser>
-    auto option(auto label, V T::*member, Parser p) {
-        namespace x3 = boost::spirit::x3;
+    struct parser_policy_tag {};
 
-        auto rule = detail::member_rule<V>("value", p);
+    struct parser_policy {
+        auto option_separator() const {
+            return boost::spirit::x3::eps;
+        }
 
-        return x3::as_parser(label)                          //
-               > detail::parser::option_separator            //
-               > x3::expect[rule][detail::propagate(member)] //
-               > x3::no_skip[detail::parser::option_terminator];
-    }
-
-    template <typename T, typename V> auto option(auto label, V T::*member) {
-        namespace x3 = boost::spirit::x3;
-
-        if constexpr (std::same_as<bool, V>) {
-            // bool is special because it doesn't have a value.
-            auto set_bool = [=](auto &ctx) { x3::_val(ctx).*member = true; };
-            auto parser = x3::as_parser(label) //
-                          > x3::no_skip[detail::parser::option_terminator];
-            return parser[set_bool];
-        } else {
-            return x3::as_parser(label)                 //
-                   > detail::parser::option_separator   //
-                   > detail::make_member_parser(member) //
-                   > x3::no_skip[detail::parser::option_terminator];
+        auto option_terminator() const {
+            return boost::spirit::x3::lit(';');
         }
     };
 
-} // namespace sk::config
+}; // namespace sk::config
 
-#endif // SK_CONFIG_PARSER_OPTION_HXX_INCLUDED
+#endif // SK_CONFIG_PARSER_POLICY_HXX_INCLUDED

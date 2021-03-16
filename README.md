@@ -6,6 +6,8 @@ Features:
 
 * Parses the widely-used `named`-style configuration file format which is 
   easy for humans to understand and familiar to users.
+* Details of the file format can be customised via parser policies or
+  custom parsers.
 * Parse configuration data directly into STL containers and user-defined
   structs.
 * Useful, human-readable error reporting:
@@ -124,6 +126,46 @@ user "scott" {
 
 Single-line comments are introduced with `#`, and multi-line comments are
 confixed with `/* ... */`.
+
+## Customising the parser
+
+The parser can be customised by providing a parser policy to `parse()`.  For
+example, say we want options to be formatted as `opt: value`, and instead of
+terminating options with a semicolon, we want to allow newline as a 
+terminator.  We can express this policy like this:
+
+```
+	using namespace x3 = boost::spirit::x3;
+
+    struct my_policy : cfg::parser_policy {
+		// Change the parser that will be used to parse end-of-option.
+        auto option_terminator() const {
+            return x3::eol;
+        }
+
+		// Change the parser that will be expected between an option
+		// and its value.
+		auto option_separator() const {
+            return x3::lit(':');
+        }
+
+    };
+```
+
+Now we can use our custom policy when parsing:
+
+```
+	parse<my_policy>(filename, grammar, ret);
+```
+
+This will parse configuration files that look like this:
+
+```
+user "fred" {
+	uid: 0
+	full-name: "Fred Smith"
+};
+```
 
 ## Include files
 

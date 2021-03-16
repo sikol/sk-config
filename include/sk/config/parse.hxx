@@ -45,6 +45,7 @@
 
 #include <sk/config/detail/error_formatter.hxx>
 #include <sk/config/detail/parser/comment.hxx>
+#include <sk/config/parser_policy.hxx>
 #include <sk/config/error.hxx>
 
 namespace sk::config {
@@ -52,8 +53,9 @@ namespace sk::config {
     /*
      * Wrapper around x3::phrase_parse to handle errors.
      */
-    template <typename Iterator>
-    auto parse(Iterator first, Iterator last, auto const &grammar, auto &ret,
+    template <typename Policy = parser_policy, typename Iterator>
+    auto parse(Iterator first, Iterator last,
+               auto const &grammar, auto &ret,
                std::string const &filename = "") {
         namespace x3 = boost::spirit::x3;
 
@@ -61,8 +63,10 @@ namespace sk::config {
         auto error_handler = detail::error_formatter(
             first, last, std::back_inserter(errors), filename);
 
+        Policy policy;
         auto const grammar_ =
-            x3::with<x3::error_handler_tag>(std::ref(error_handler))[grammar];
+            x3::with<parser_policy_tag>(std::ref(policy))[
+                x3::with<x3::error_handler_tag>(std::ref(error_handler))[grammar]];
 
         bool r = x3::phrase_parse(first, last, grammar_,
                                   detail::parser::comment, ret);
@@ -71,17 +75,20 @@ namespace sk::config {
         return true;
     }
 
+    template <typename Policy = parser_policy>
     auto parse(std::ranges::range auto const &r, auto const &grammar, auto &ret,
                std::string const &filename = "") {
-        return sk::config::parse(std::ranges::begin(r), std::ranges::end(r),
+        return parse<Policy>(std::ranges::begin(r), std::ranges::end(r),
                                  grammar, ret, filename);
     }
 
+    template <typename Policy = parser_policy>
     auto parse(char const *s, auto const &grammar, auto &ret,
                std::string const &filename = "") {
-        return sk::config::parse(std::string_view(s), grammar, ret, filename);
+        return parse<Policy>(std::string_view(s), grammar, ret, filename);
     }
 
+    template <typename Policy = parser_policy>
     auto parse_file(std::filesystem::path filename, auto const &grammar,
                     auto &ret) {
 
@@ -94,7 +101,7 @@ namespace sk::config {
             fs.open(filename);
             fs.unsetf(std::ios::skipws);
             boost::spirit::istream_iterator begin(fs), end;
-            return parse(begin, end, grammar, ret, utf8name);
+            return parse<Policy>(begin, end, grammar, ret, utf8name);
         } catch (std::ios_base::failure const &e) {
             error_detail ed;
             ed.file = utf8name;
