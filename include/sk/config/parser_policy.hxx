@@ -36,13 +36,31 @@ namespace sk::config {
     struct parser_policy_tag {};
 
     struct parser_policy {
+        /*
+         * The parser used to separate option names from their values.
+         * By default this is eps, meaning no separator.
+         */
         auto option_separator() const {
             return boost::spirit::x3::eps;
         }
 
+        /*
+         * The parser that should appear after an option's value.  This
+         * cannot be eps because that would create ambiguities in the
+         * parser.
+         * 
+         * This parser is always invoked with lexeme[], so it can match
+         * whitespace.
+         */
         auto option_terminator() const {
             return boost::spirit::x3::lit(';');
         }
+
+        // Whether to accept inline lists, `val, val, val...`
+        static constexpr bool allow_inline_lists = true;
+
+        // Whether to accept braced lists, { val; val; val...; }
+        static constexpr bool allow_braced_lists = true;
     };
 
 }; // namespace sk::config

@@ -36,7 +36,22 @@
 
 namespace sk::config::detail::parser {
 
-    // std::vector<T> attribute
+    /*
+     * Parse a list of values.  Depending on the parser policy, we accept
+     * two different list formats.
+     *
+     * Inline list:
+     *   option 1, 42, 666;
+     *
+     * Braced list:
+     *   option {
+     *     1;
+     *     42;
+     *     666;
+     *   };
+     *
+     */
+
     template <typename T> struct vector : boost::spirit::x3::parser<vector<T>> {
         typedef std::vector<typename T::attribute_type> attribute_type;
         static bool const has_attribute = true;
@@ -47,9 +62,26 @@ namespace sk::config::detail::parser {
                    Attribute &attr) const {
             namespace x3 = boost::spirit::x3;
 
+            auto const &policy = x3::get<parser_policy_tag>(context).get();
+
             static T parser;
-            static auto const grammar = parser % ',';
-            return grammar.parse(first, last, context, x3::unused, attr);
+            static auto const inline_grammar = parser % ',';
+            static auto const braced_grammar =
+                '{' > *(parser > policy.option_terminator()) > '}';
+
+            if (policy.allow_inline_lists) {
+                if (inline_grammar.parse(first, last, context, x3::unused,
+                                         attr))
+                    return true;
+            }
+
+            if (policy.allow_braced_lists) {
+                if (braced_grammar.parse(first, last, context, x3::unused,
+                                         attr))
+                    return true;
+            }
+
+            return false;
         }
     };
 

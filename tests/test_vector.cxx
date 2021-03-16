@@ -39,7 +39,7 @@
 #include <sk/config/config.hxx>
 #include <sk/config/parse.hxx>
 
-TEST_CASE("std::vector<int>") {
+TEST_CASE("std::vector<int>, inline") {
     namespace cr = sk::config;
 
     struct test_config {
@@ -62,3 +62,63 @@ int-value 666;
     REQUIRE(c.items[2] == 666);
 }
 
+TEST_CASE("std::vector<int>, braced") {
+    namespace cr = sk::config;
+
+    struct test_config {
+        std::vector<int> items;
+    };
+
+    auto grammar =
+        cr::config<test_config>(cr::option("int-value", &test_config::items));
+    test_config c;
+
+    sk::config::parse(R"(
+int-value {
+    1;
+    42;
+    666;
+};
+)",
+                      grammar, c);
+
+    REQUIRE(c.items.size() == 3);
+    REQUIRE(c.items[0] == 1);
+    REQUIRE(c.items[1] == 42);
+    REQUIRE(c.items[2] == 666);
+}
+
+TEST_CASE("std::vector<std::vector<int>>") {
+    namespace cfg = sk::config;
+
+    struct test_config {
+        std::vector<std::vector<int>> items;
+    };
+
+    auto grammar =
+        cfg::config<test_config>(cfg::option("int-value", &test_config::items));
+    test_config c;
+
+    try {
+        cfg::parse(R"(
+int-value {1; 2; 3;}, {4; 5; 6;}, {7; 8; 9;};
+)",
+                          grammar, c);
+    } catch (cfg::parse_error const &e) {
+        std::cerr << e;
+    }
+
+    REQUIRE(c.items.size() == 3);
+    REQUIRE(c.items[0].size() == 3);
+    REQUIRE(c.items[1].size() == 3);
+    REQUIRE(c.items[2].size() == 3);
+    REQUIRE(c.items[0][0] == 1);
+    REQUIRE(c.items[0][1] == 2);
+    REQUIRE(c.items[0][2] == 3);
+    REQUIRE(c.items[1][0] == 4);
+    REQUIRE(c.items[1][1] == 5);
+    REQUIRE(c.items[1][2] == 6);
+    REQUIRE(c.items[2][0] == 7);
+    REQUIRE(c.items[2][1] == 8);
+    REQUIRE(c.items[2][2] == 9);
+}

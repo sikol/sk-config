@@ -38,6 +38,7 @@
 #include <sk/config/option.hxx>
 #include <sk/config/parse.hxx>
 #include <sk/config/parser/numeric.hxx>
+#include <sk/config/parser/vector.hxx>
 
 TEST_CASE("custom option terminator") {
     namespace cfg = sk::config;
@@ -105,4 +106,48 @@ TEST_CASE("custom option separator") {
 
     REQUIRE(c.a == 42);
     REQUIRE(c.b == 666);
+}
+
+struct no_braced_lists : sk::config::parser_policy {
+    static constexpr bool allow_braced_lists = false;
+};
+
+TEST_CASE("parser_policy::allow_braced_lists") {
+    namespace cfg = sk::config;
+
+    struct test_config {
+        std::vector<int> items;
+    };
+
+    auto grammar =
+        cfg::config<test_config>(cfg::option("v", &test_config::items));
+
+    test_config c;
+
+    cfg::parse(R"(v { 1; 42; 666; };)", grammar, c);
+
+    REQUIRE_THROWS(
+        (cfg::parse<no_braced_lists>(R"(v { 1; 42; 666; };)", grammar, c)));
+}
+
+struct no_inline_lists : sk::config::parser_policy {
+    static constexpr bool allow_inline_lists = false;
+};
+
+TEST_CASE("parser_policy::allow_inline_lists") {
+    namespace cfg = sk::config;
+
+    struct test_config {
+        std::vector<int> items;
+    };
+
+    auto grammar =
+        cfg::config<test_config>(cfg::option("v", &test_config::items));
+
+    test_config c;
+
+    cfg::parse(R"(v 1, 42, 666;)", grammar, c);
+
+    REQUIRE_THROWS(
+        (cfg::parse<no_inline_lists>(R"(v 1, 42, 666;)", grammar, c)));
 }
