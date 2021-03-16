@@ -116,9 +116,9 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: |
         cmake                                                               \
-            -DCMAKE_C_COMPILER=gcc                                          \
+            -DCMAKE_C_COMPILER=gcc-10                                       \
             -DCMAKE_C_FLAGS="-m64 -g3"                                      \
-            -DCMAKE_CXX_COMPILER=g++                                        \
+            -DCMAKE_CXX_COMPILER=g++-10                                     \
             -DCMAKE_CXX_FLAGS="-m64 -std=c++20 -g3"                         \
             -DCMAKE_BUILD_TYPE=$BUILD_TYPE                                  \
             -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   \
