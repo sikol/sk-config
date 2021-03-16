@@ -49,7 +49,7 @@ namespace sk::config::parser {
 
         template <typename Here, typename Next, typename... Rest>
         auto make_parser_for() const {
-            return Here() > ',' > Next() > ',' > make_parser_for<Rest...>();
+            return Here() > ',' > make_parser_for<Next, Rest...>();
         }
 
         template <typename Iterator, typename Context, typename Attribute>

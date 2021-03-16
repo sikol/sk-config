@@ -67,7 +67,12 @@ TEST_CASE("vector of symbols") {
             cfg::option("val", &test_config::val, syms % ','));
 
     test_config c;
-    cfg::parse("val two, three;", grammar, c);
+    try {
+        cfg::parse("val two, three;", grammar, c);
+    } catch (cfg::parse_error const &e) {
+        std::cerr << e;
+    }
+
     REQUIRE(c.val.size() == 2);
     REQUIRE(c.val[0] == 2);
     REQUIRE(c.val[1] == 3);

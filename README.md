@@ -15,7 +15,7 @@ in .\sample\sample1.conf, line 10: expected a string
 here -------^
 ```
 * Simple API abstracts away the details of Spirit for most parsers.
-* ... but provides full to the underlying Spirit parser if desired.
+* ... but provides full access to the underlying Spirit parser if desired.
 * Dynamically-generated parser can be extended to support any data type,
   including user-defined types, or even embed complete Spirit sub-parsers.
 
@@ -282,13 +282,13 @@ Symbols can also be used to parse a list of values:
 
 ```c++
 struct test_config {
-	std::vector<int> my_option;
+	std::vector<int> my_options;
 };
 
 x3::symbols<int> syms;
 syms.add("one", 1)("two", 2)("three", 3);
 // ...
-	cfg::option("my-option", &test_config::my_option, syms % ',');
+	cfg::option("my-option", &test_config::my_options, syms % ',');
 ```
 
 ```

@@ -31,14 +31,14 @@
 
 #include <deque>
 
-#include <sk/config/detail/vector_parser.hxx>
+#include <sk/config/detail/parser/vector.hxx>
 #include <sk/config/parser_for.hxx>
 
 namespace sk::config {
 
     template <typename T> struct parser_for<std::deque<T>> {
         using parser_type =
-            detail::vector_parser<typename parser_for<T>::parser_type>;
+            detail::parser::vector<typename parser_for<T>::parser_type>;
         using rule_type = std::vector<T>;
         static constexpr char const name[] = "a list of values";
     };

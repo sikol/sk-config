@@ -26,28 +26,33 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_DETAIL_COMMENT_PARSER_HXX_INCLUDED
-#define SK_CONFIG_DETAIL_COMMENT_PARSER_HXX_INCLUDED
+#ifndef SK_CONFIG_DETAIL_VECTOR_PARSER_HXX_INCLUDED
+#define SK_CONFIG_DETAIL_VECTOR_PARSER_HXX_INCLUDED
 
 #include <string>
+#include <vector>
 
 #include <boost/spirit/home/x3.hpp>
 
-namespace sk::config::detail {
+namespace sk::config::detail::parser {
 
-    /*
-     * Parse a comment, which is either a C-style comment or a '#'
-     * comment.
-     *
-     * This parser is not used directly, but is the config skip parser.
-     */
+    // std::vector<T> attribute
+    template <typename T> struct vector : boost::spirit::x3::parser<vector<T>> {
+        typedef std::vector<typename T::attribute_type> attribute_type;
+        static bool const has_attribute = true;
 
-    auto const comment_parser =                              //
-        boost::spirit::x3::space                             //
-        | "/*" >> *(boost::spirit::x3::char_ - "*/") >> "*/" //
-        | "#" >> *(boost::spirit::x3::char_ - boost::spirit::x3::eol) >>
-              boost::spirit::x3::eol;
+        template <typename Iterator, typename Context, typename Attribute>
+        bool parse(Iterator &first, Iterator const &last,
+                   Context const &context, boost::spirit::x3::unused_type,
+                   Attribute &attr) const {
+            namespace x3 = boost::spirit::x3;
 
-} // namespace sk::config::detail
+            static T parser;
+            static auto const grammar = parser % ',';
+            return grammar.parse(first, last, context, x3::unused, attr);
+        }
+    };
 
-#endif // SK_CONFIG_DETAIL_COMMENT_PARSER_HXX_INCLUDED
+} // namespace sk::config::detail::parser
+
+#endif // SK_CONFIG_DETAIL_VECTOR_PARSER_HXX_INCLUDED

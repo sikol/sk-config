@@ -44,7 +44,7 @@
 #include <boost/spirit/include/support_istream_iterator.hpp>
 
 #include <sk/config/detail/error_formatter.hxx>
-#include <sk/config/detail/comment_parser.hxx>
+#include <sk/config/detail/parser/comment.hxx>
 #include <sk/config/error.hxx>
 
 namespace sk::config {
@@ -64,8 +64,8 @@ namespace sk::config {
         auto const grammar_ =
             x3::with<x3::error_handler_tag>(std::ref(error_handler))[grammar];
 
-        bool r = x3::phrase_parse(first, last, grammar_, detail::comment_parser,
-                                  ret);
+        bool r = x3::phrase_parse(first, last, grammar_,
+                                  detail::parser::comment, ret);
         if (r == false || (first != last))
             throw parse_error("could not parse the entire input", errors);
         return true;

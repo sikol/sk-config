@@ -40,7 +40,27 @@
 #include <sk/config/config.hxx>
 #include <sk/config/parse.hxx>
 
-TEST_CASE("tuple<>") {
+TEST_CASE("2-tuple<>") {
+    namespace cr = sk::config;
+
+    struct test_config {
+        std::tuple<int, std::string> v;
+    };
+
+    auto grammar = cr::config<test_config>(cr::option("v", &test_config::v));
+
+    test_config c;
+    try {
+        sk::config::parse("v 42, 'test string';", grammar, c);
+    } catch (sk::config::parse_error const &e) {
+        std::cerr << e;
+    }
+
+    REQUIRE(get<0>(c.v) == 42);
+    REQUIRE(get<1>(c.v) == "test string");
+}
+
+TEST_CASE("3-tuple<>") {
     namespace cr = sk::config;
 
     struct test_config {
