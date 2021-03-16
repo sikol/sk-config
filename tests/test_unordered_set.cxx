@@ -32,6 +32,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 
 #include <sk/config/parser/unordered_set.hxx>
 #include <sk/config/parser/numeric.hxx>
@@ -40,31 +41,24 @@
 #include <sk/config/parse.hxx>
 
 TEST_CASE("std::unordered_set<int>") {
-    namespace cr = sk::config;
+    namespace cfg = sk::config;
 
     struct test_config {
         std::unordered_set<int> items;
     };
 
     auto grammar =
-        cr::config<test_config>(cr::option("int-value", &test_config::items));
+        cfg::config<test_config>(cfg::option("int-value", &test_config::items));
     test_config c;
 
-    sk::config::parse(R"(
+    cfg::parse(R"(
 int-value 1, 42;
 int-value 666;
 )",
                       grammar, c);
 
     REQUIRE(c.items.size() == 3);
-
-    auto begin = c.items.begin();
-
-    REQUIRE(*begin == 1);
-    ++begin;
-
-    REQUIRE(*begin == 42);
-    ++begin;
-
-    REQUIRE(*begin == 666);
+    REQUIRE(c.items.contains(1));
+    REQUIRE(c.items.contains(42));
+    REQUIRE(c.items.contains(666));
 }

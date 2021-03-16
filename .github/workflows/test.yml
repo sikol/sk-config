@@ -92,3 +92,89 @@ jobs:
       working-directory: ${{github.workspace}}/build
       shell: cmd
       run: ctest -V
+
+  x64_linux_gcc:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Cache vcpkg
+      id: cache-vcpkg
+      uses: actions/cache@v2
+      with:
+        path: ~/AppData/Local/vcpkg
+        key: x64-linux-gcc-vcpkg
+
+    - name: Create build environment
+      run: cmake -E make_directory ${{github.workspace}}/build
+
+    - name: Configure CMake
+      shell: cmd
+      working-directory: ${{github.workspace}}/build
+      run: |
+        cmake -G Ninja                                                      \
+            -DCMAKE_C_COMPILER=gcc                                          \
+            -DCMAKE_C_FLAGS="-m64 -g3"                                      \
+            -DCMAKE_CXX_COMPILER=g++                                        \
+            -DCMAKE_CXX_FLAGS="-m64 -std=c++20 -g3"                         \
+            -DCMAKE_BUILD_TYPE=$BUILD_TYPE                                  \
+            -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   \
+            -DSK_CONFIG_BUILD_TESTS:BOOL=ON                                 \
+            ..
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      shell: cmd
+      run: |
+        cmake --build .
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      shell: cmd
+      run: ctest -V
+
+  x64_linux_clang:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Cache vcpkg
+      id: cache-vcpkg
+      uses: actions/cache@v2
+      with:
+        path: ~/AppData/Local/vcpkg
+        key: x64-linux-clang-vcpkg
+
+    - name: Create build environment
+      run: cmake -E make_directory ${{github.workspace}}/build
+
+    - name: Configure CMake
+      shell: cmd
+      working-directory: ${{github.workspace}}/build
+      run: |
+        cmake -G Ninja                                                      \
+            -DCMAKE_C_COMPILER=clang                                        \
+            -DCMAKE_C_FLAGS="-m64 -g3"                                      \
+            -DCMAKE_CXX_COMPILER=clang++                                    \
+            -DCMAKE_CXX_FLAGS="-m64 -std=c++20 -g3"                         \
+            -DCMAKE_BUILD_TYPE=$BUILD_TYPE                                  \
+            -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   \
+            -DSK_CONFIG_BUILD_TESTS:BOOL=ON                                 \
+            ..
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      shell: cmd
+      run: |
+        cmake --build .
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      shell: cmd
+      run: ctest -V

@@ -57,16 +57,9 @@ int-value 666;
                       grammar, c);
 
     REQUIRE(c.items.size() == 3);
-
-    auto begin = c.items.begin();
-
-    REQUIRE(*begin == 1);
-    ++begin;
-
-    REQUIRE(*begin == 42);
-    ++begin;
-
-    REQUIRE(*begin == 666);
+    REQUIRE(c.items.contains(1));
+    REQUIRE(c.items.contains(42));
+    REQUIRE(c.items.contains(666));
 }
 
 TEST_CASE("std::set<int> fails on non-unique values") {
