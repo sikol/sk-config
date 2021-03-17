@@ -95,3 +95,31 @@ item "one" { value 42; };
 )",
                               grammar, c));
 }
+
+TEST_CASE("std::unordered_map<string,int>") {
+    namespace cfg = sk::config;
+
+    struct test_config {
+        std::unordered_map<std::string, int> items;
+    };
+
+    auto grammar =                //
+        cfg::config<test_config>( //
+            cfg::option("items", &test_config::items));
+
+    test_config c;
+
+    cfg::parse(R"(
+items {
+    one 1;
+    three 3;
+    forty-two 42;
+};
+)",
+               grammar, c);
+
+    REQUIRE(c.items.size() == 3);
+    REQUIRE(c.items["one"] == 1);
+    REQUIRE(c.items["three"] == 3);
+    REQUIRE(c.items["forty-two"] == 42);
+}
