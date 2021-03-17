@@ -37,10 +37,23 @@
 namespace sk::config {
 
     template <typename T> struct parser_for<std::list<T>> {
-        using parser_type = detail::parser::vector<typename parser_for<T>::parser_type>;
+        using parser_type =
+            detail::parser::vector<typename parser_for<T>::parser_type>;
         using rule_type = std::vector<T>;
         static constexpr char const name[] = "a list of values";
     };
+
+    namespace detail {
+
+        // list<T> <- vector<T>
+        template <typename U>
+        void propagate_value(auto & /*ctx*/, std::list<U> &to,
+                             std::vector<U> &from) {
+            std::move(from.begin(), from.end(), std::back_inserter(to));
+            from.clear();
+        }
+
+    } // namespace detail
 
 } // namespace sk::config
 

@@ -43,6 +43,25 @@ namespace sk::config {
         static constexpr char const name[] = "a list of values";
     };
 
+    namespace detail {
+
+        // set<T> <- vector<T>
+        template <typename U>
+        void propagate_value(auto &ctx, std::set<U> &to, std::vector<U> &from) {
+            namespace x3 = boost::spirit::x3;
+
+            for (auto &&v : from) {
+                if (!to.insert(v).second) {
+                    auto it = x3::_where(ctx).begin();
+                    boost::throw_exception(
+                        x3::expectation_failure<decltype(it)>(it,
+                                                              "unique value"));
+                }
+            }
+        }
+
+    } // namespace detail
+
 } // namespace sk::config
 
 #endif // SK_CONFIG_PARSER_SET_HXX_INCLUDED

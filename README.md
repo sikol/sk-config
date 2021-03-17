@@ -57,7 +57,7 @@ struct access_config {
 };
 
 struct config {
-    std::vector<user> users;
+    std::map<std::string, user> users;
     access_config access;
 };
 
@@ -87,10 +87,10 @@ int main(int argc, char **argv) {
 
 `sk-config` is tested with:
 
-* MSVC 19.28 (VS 2019 16.9) on Windows
+* MSVC 19.28 (VS 16.9) on Windows
 * Clang 11.0.1 on Windows
-* Clang 11.0.1 on Linux
-* GCC 10.2 on Linux
+* Clang 10.0.0 on Linux
+* GCC 10.2.0 on Linux
 
 It should work with any reasonably-compliant compiler supporting C++20.
 
@@ -200,6 +200,8 @@ Standard container parsers:
 * `<sk/config/parser/unordered_set.hxx>`
 * `<sk/config/parser/variant.hxx>`
 * `<sk/config/parser/vector.hxx>`
+* `<sk/config/parser/map.hxx>`
+* `<sk/config/parser/unordered_map.hxx>`
 
 ## Supported types
 
@@ -323,6 +325,13 @@ struct no_inline_lists : sk::config::parser_policy {
     static constexpr bool allow_braced_lists = true;
 };
 ```
+
+### Maps
+
+`std::map<T,U>` and `std::unordered_map<T,U>` are supported for named blocks
+(only), where `T` is the type of the block's name, and `U` is the type of
+the block.  The values will be inserted into the map using the block name
+as the key; duplicate keys will raise an error.
 
 ### std::variant
 

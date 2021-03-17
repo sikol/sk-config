@@ -58,6 +58,12 @@ namespace sk::config {
             }
         };
 
+        template <typename... Ts>
+        void propagate_value(auto & /*ctx*/, std::variant<Ts...> &to,
+                             std::variant<Ts...> &from) {
+            to = std::move(from);
+        }
+
     } // namespace detail
 
     template <typename... Ts> struct parser_for<std::variant<Ts...>> {

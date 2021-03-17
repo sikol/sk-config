@@ -62,6 +62,7 @@ target_sources(sk-config PRIVATE
 	include/sk/config/detail/parser/identifier.hxx
 	include/sk/config/detail/parser/heredoc.hxx
 	include/sk/config/detail/parser/vector.hxx
+	include/sk/config/detail/parser/bool.hxx
 	include/sk/config/detail/parser/comment.hxx
 	include/sk/config/detail/parser/option_terminator.hxx
 	include/sk/config/detail/parser/option_separator.hxx
@@ -76,9 +77,10 @@ target_sources(sk-config PRIVATE
 	include/sk/config/option.hxx
 	include/sk/config/parser_policy.hxx
 	include/sk/config.hxx
- "include/sk/config/detail/parser/bool.hxx")
+  "include/sk/config/parser/map.hxx" "include/sk/config/parser/unordered_map.hxx")
 
 target_include_directories(sk-config INTERFACE include)
+
 target_compile_features(sk-config INTERFACE cxx_std_20)
 
 install(DIRECTORY "include/sk" TYPE INCLUDE)

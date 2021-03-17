@@ -32,81 +32,45 @@
 #include <boost/spirit/home/x3.hpp>
 
 namespace sk::config::detail {
+
+    // T <- T
+    void propagate_value(auto &/*ctx*/, auto &to, auto &from) {
+        to = std::move(from);
+    }
+
+    void propagate_value(auto &ctx, auto &to, auto &from, auto /*name*/) {
+        propagate_value(ctx, to, from);
+    }
+
     template <typename T, typename V> struct propagate {
         V T::*member;
 
         propagate(V T::*member_) : member(member_) {}
 
-        template <typename To, typename From>
-        void impl(auto &ctx, To &to, From &from) {
-            to = std::move(from);
-        }
-
-        // vector<T> <- T
-        // This one is required for vector of UDTs.
-        template <typename U>
-        void impl(auto &ctx, std::vector<U> &to, U &from) {
-            to.push_back(from);
-        }
-
-        // vector<T> <- vector<T>
-        template <typename U>
-        void impl(auto &ctx, std::vector<U> &to, std::vector<U> &from) {
-            std::move(from.begin(), from.end(), std::back_inserter(to));
-            from.clear();
-        }
-
-        // list<T> <- vector<T>
-        template <typename U>
-        void impl(auto &ctx, std::list<U> &to, std::vector<U> &from) {
-            std::move(from.begin(), from.end(), std::back_inserter(to));
-            from.clear();
-        }
-
-        // set<T> <- vector<T>
-        template <typename U>
-        void impl(auto &ctx, std::set<U> &to, std::vector<U> &from) {
+        template <typename Context> void operator()(Context &ctx) {
             namespace x3 = boost::spirit::x3;
 
-            for (auto &&v : from) {
-                if (!to.insert(v).second) {
-                    auto it = x3::_where(ctx).begin();
-                    boost::throw_exception(
-                        x3::expectation_failure<decltype(it)>(it,
-                                                              "unique value"));
-                }
-            }
+            propagate_value(ctx, x3::_val(ctx).*member, x3::_attr(ctx));
         }
+    };
+    template <typename T, typename V> propagate(V T::*) -> propagate<T, V>;
 
-        // unordered_set<T> <- vector<T>
-        template <typename U>
-        void impl(auto &ctx, std::unordered_set<U> &to, std::vector<U> &from) {
-            namespace x3 = boost::spirit::x3;
+    template <typename T, typename V, typename U, typename W>
+    struct propagate_named {
+        V T::*member;
+        W U::*name;
 
-            for (auto &&v : from) {
-                if (!to.insert(v).second) {
-                    auto it = x3::_where(ctx).begin();
-                    boost::throw_exception(
-                        x3::expectation_failure<decltype(it)>(it,
-                                                              "unique value"));
-                }
-            }
-        }
-
-        // deque<T> <- vector<T>
-        template <typename U>
-        void impl(auto &ctx, std::deque<U> &to, std::vector<U> &from) {
-            std::move(from.begin(), from.end(), std::back_inserter(to));
-            from.clear();
-        }
+        propagate_named(V T::*member_, W U::*name_)
+            : member(member_), name(name_) {}
 
         template <typename Context> void operator()(Context &ctx) {
             namespace x3 = boost::spirit::x3;
 
-            impl(ctx, x3::_val(ctx).*member, x3::_attr(ctx));
+            propagate_value(ctx, x3::_val(ctx).*member, x3::_attr(ctx), name);
         }
     };
-    template <typename T, typename V> propagate(V T::*) -> propagate<T, V>;
+    template <typename T, typename V, typename U, typename W>
+    propagate_named(V T::*, W U::*) -> propagate_named<T, V, U, W>;
 
 } // namespace sk::config::detail
 

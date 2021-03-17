@@ -26,35 +26,35 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_PARSER_DEQUE_HXX_INCLUDED
-#define SK_CONFIG_PARSER_DEQUE_HXX_INCLUDED
+#ifndef SK_CONFIG_PARSER_UNORDERED_MAP_HXX_INCLUDED
+#define SK_CONFIG_PARSER_UNORDERED_MAP_HXX_INCLUDED
 
-#include <deque>
+#include <unordered_map>
 
-#include <sk/config/detail/parser/vector.hxx>
+#include <boost/spirit/home/x3.hpp>
+
 #include <sk/config/parser_for.hxx>
 
 namespace sk::config {
 
-    template <typename T> struct parser_for<std::deque<T>> {
-        using parser_type =
-            detail::parser::vector<typename parser_for<T>::parser_type>;
-        using rule_type = std::vector<T>;
-        static constexpr char const name[] = "a list of values";
-    };
-
     namespace detail {
 
-        // deque<T> <- vector<T>
-        template <typename U>
-        void propagate_value(auto & /*ctx*/, std::deque<U> &to,
-                             std::vector<U> &from) {
-            std::move(from.begin(), from.end(), std::back_inserter(to));
-            from.clear();
+        template <typename T, typename U>
+        void propagate_value(auto &ctx, std::unordered_map<T, U> &to, U &from,
+                             auto &name) {
+            namespace x3 = boost::spirit::x3;
+
+            auto r = to.insert(std::make_pair(from.*name, from));
+
+            if (!r.second) {
+                auto it = x3::_where(ctx).begin();
+                boost::throw_exception(
+                    x3::expectation_failure<decltype(it)>(it, "unique value"));
+            }
         }
 
     } // namespace detail
 
 } // namespace sk::config
 
-#endif // SK_CONFIG_PARSER_DEQUE_HXX_INCLUDED
+#endif // SK_CONFIG_PARSER_UNORDERED_MAP_HXX_INCLUDED

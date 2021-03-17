@@ -1,4 +1,11 @@
 ﻿{
+  "environments": [
+    {
+      "environment": "icc",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+
+    }
+  ],
   "configurations": [
     {
       "name": "x64-windows-msvc-debug",
@@ -45,6 +52,56 @@
           "name": "VCPKG_FEATURE_FLAGS",
           "value": "registries",
           "type": "STRING"
+        },
+        {
+          "name": "CMAKE_C_FLAGS",
+          "value": "-m64 -fdiagnostics-absolute-paths /RTC1 /Od /Zi /MDd /Wall",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_CXX_FLAGS",
+          "value": "-m64 -fdiagnostics-absolute-paths /RTC1 /Od /Zi /MDd /EHsc /Wall -Wno-reserved-id-macro -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-disabled-macro-expansion ",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "name": "x64-windows-icx-debug",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "environments": [
+        {
+          "INTEL_TARGET_ARCH": "intel64",
+          "LIB": "C:\\Program Files (x86)\\Intel\\oneAPI\\tbb\\latest\\env\\..\\lib\\intel64\\vc14;C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\latest\\windows\\compiler\\lib;C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\latest\\windows\\compiler\\lib\\intel64_win;C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\latest\\windows\\lib;C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\latest\\windows\\lib\\x64;${env.LIB}"
+        }
+      ],
+      "generator": "Ninja",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "variables": [
+        {
+          "name": "SK_CONFIG_BUILD_TESTS",
+          "value": "ON",
+          "type": "BOOL"
+        },
+        {
+          "name": "VCPKG_FEATURE_FLAGS",
+          "value": "registries",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_C_COMPILER",
+          "value": "C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\latest\\windows\\bin\\icx.exe",
+          "type": "PATH"
+        },
+        {
+          "name": "CMAKE_CXX_COMPILER",
+          "value": "C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\latest\\windows\\bin\\icx.exe",
+          "type": "PATH"
         },
         {
           "name": "CMAKE_C_FLAGS",

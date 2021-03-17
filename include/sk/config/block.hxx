@@ -73,7 +73,7 @@ namespace sk::config {
                           > member_parser[do_nothing]    //
                           > '}')                         //
                       > x3::no_skip[detail::parser::option_terminator];
-        return detail::rule<U>(label, parser)[detail::propagate(mm)];
+        return detail::rule<U>(label, parser)[detail::propagate_named(mm, name)];
     }
 
 } // namespace sk::config

@@ -31,16 +31,17 @@
 
 // Include all supported parser types.
 
-#include <sk/config/parser/numeric.hxx>
-#include <sk/config/parser/string.hxx>
-
-#include <sk/config/parser/vector.hxx>
-#include <sk/config/parser/set.hxx>
-#include <sk/config/parser/unordered_set.hxx>
 #include <sk/config/parser/deque.hxx>
 #include <sk/config/parser/list.hxx>
-#include <sk/config/parser/variant.hxx>
+#include <sk/config/parser/map.hxx>
+#include <sk/config/parser/numeric.hxx>
+#include <sk/config/parser/set.hxx>
+#include <sk/config/parser/string.hxx>
 #include <sk/config/parser/tuple.hxx>
+#include <sk/config/parser/unordered_set.hxx>
+#include <sk/config/parser/unordered_map.hxx>
+#include <sk/config/parser/variant.hxx>
+#include <sk/config/parser/vector.hxx>
 
 #include <sk/config/option.hxx>
 #include <sk/config/block.hxx>

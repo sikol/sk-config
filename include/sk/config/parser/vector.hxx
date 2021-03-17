@@ -43,6 +43,25 @@ namespace sk::config {
         static constexpr char const name[] = "a list of values";
     };
 
+    namespace detail {
+
+        // vector<T> <- T
+        // This one is required for vector of UDTs.
+        template <typename U>
+        void propagate_value(auto & /*ctx*/, std::vector<U> &to, U &from) {
+            to.push_back(from);
+        }
+
+        // vector<T> <- vector<T>
+        template <typename U>
+        void propagate_value(auto & /*ctx*/, std::vector<U> &to,
+                             std::vector<U> &from) {
+            std::move(from.begin(), from.end(), std::back_inserter(to));
+            from.clear();
+        }
+
+    } // namespace detail
+
 } // namespace sk::config
 
 #endif // SK_CONFIG_PARSER_VECTOR_HXX_INCLUDED

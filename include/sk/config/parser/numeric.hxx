@@ -52,6 +52,10 @@ namespace sk::config {
         static constexpr char const name[] = "a boolean";
     };
 
+    void propagate_value(auto & /*ctx*/, bool &to, bool from) {
+        to = from;
+    }
+
     // signed_integral
     template <std::signed_integral T> struct parser_for<T> {
         using parser_type = boost::spirit::x3::int_parser<T>;
@@ -59,12 +63,22 @@ namespace sk::config {
         static constexpr char const name[] = "an integer";
     };
 
+    template <std::signed_integral T>
+    void propagate_value(auto & /*ctx*/, T &to, T from) {
+        to = from;
+    }
+
     // unsigned_integral
     template <std::unsigned_integral T> struct parser_for<T> {
         using parser_type = boost::spirit::x3::uint_parser<T>;
         using rule_type = T;
         static constexpr char const name[] = "a positive integer";
     };
+
+    template <std::unsigned_integral T>
+    void propagate_value(auto & /*ctx*/, T &to, T from) {
+        to = from;
+    }
 
     // floating_point
     template <typename T>
@@ -76,6 +90,11 @@ namespace sk::config {
         using rule_type = T;
         static constexpr char const name[] = "a decimal number";
     };
+
+    template <std::floating_point T>
+    void propagate_value(auto & /*ctx*/, T &to, T from) {
+        to = from;
+    }
 
 }; // namespace sk::config
 
