@@ -38,9 +38,9 @@
 #include <sk/config/config.hxx>
 #include <sk/config/option.hxx>
 #include <sk/config/parse.hxx>
+#include <sk/config/parser/map.hxx>
 #include <sk/config/parser/numeric.hxx>
 #include <sk/config/parser/string.hxx>
-#include <sk/config/parser/map.hxx>
 
 TEST_CASE("std::map<>") {
     namespace cfg = sk::config;
@@ -94,4 +94,32 @@ item "one" { value 1; };
 item "one" { value 42; };
 )",
                               grammar, c));
+}
+
+TEST_CASE("std::map<string,int>") {
+    namespace cfg = sk::config;
+
+    struct test_config {
+        std::map<std::string, int> items;
+    };
+
+    auto grammar =                //
+        cfg::config<test_config>( //
+            cfg::option("items", &test_config::items));
+
+    test_config c;
+
+    cfg::parse(R"(
+items {
+    one 1;
+    three 3;
+    forty-two 42;
+};
+)",
+               grammar, c);
+
+    REQUIRE(c.items.size() == 3);
+    REQUIRE(c.items["one"] == 1);
+    REQUIRE(c.items["three"] == 3);
+    REQUIRE(c.items["forty-two"] == 42);
 }

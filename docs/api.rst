@@ -200,7 +200,7 @@ Parse a configuration string and return the loaded configuration.
 
 * ``first``, ``last``: An iterator pair containing the configuration
   string; the iterator's value should be a char-like type.
-* ``range``: An `std::ranges::range`` containing the configuration
+* ``range``: An ``std::ranges::range`` containing the configuration
   string; the range's value should be a char-like type.
 * ``string``: A nul-terminated C string containing the configuration.
 * ``grammar``: The grammar that will be used to parse the configuration.
@@ -221,6 +221,7 @@ Parse a configuration string and return the loaded configuration.
 **Prototype**:
 
 .. code-block:: c++
+
     template <typename Policy = parser_policy>
     bool parse_file(std::filesystem::path filename,
                     auto const &grammar,
@@ -239,4 +240,4 @@ Parse a configuration file and return the loaded configuration.
 
 **Return value**
 
-``parse()`` always returns ``true``.
+``parse_file()`` always returns ``true``.

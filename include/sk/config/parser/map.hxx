@@ -33,9 +33,19 @@
 
 #include <boost/spirit/home/x3.hpp>
 
+#include <sk/config/detail/parser/map.hxx>
 #include <sk/config/parser_for.hxx>
 
 namespace sk::config {
+
+    template <typename Key, typename Value>
+    struct parser_for<std::map<Key, Value>> {
+        using parser_type =
+            detail::parser::map<typename parser_for<Key>::parser_type,
+                                typename parser_for<Value>::parser_type>;
+        using rule_type = std::vector<std::pair<Key, Value>>;
+        static constexpr char const name[] = "a block";
+    };
 
     namespace detail {
 
@@ -50,6 +60,23 @@ namespace sk::config {
                 auto it = x3::_where(ctx).begin();
                 boost::throw_exception(
                     x3::expectation_failure<decltype(it)>(it, "unique value"));
+            }
+        }
+
+        template <typename T, typename U>
+        void propagate_value(auto &ctx, std::map<T, U> &to,
+                             std::vector<std::pair<T, U>> &from) {
+            namespace x3 = boost::spirit::x3;
+
+            for (auto &&item : from) {
+                auto r = to.insert(item);
+
+                if (!r.second) {
+                    auto it = x3::_where(ctx).begin();
+                    boost::throw_exception(
+                        x3::expectation_failure<decltype(it)>(it,
+                                                              "unique value"));
+                }
             }
         }
 
