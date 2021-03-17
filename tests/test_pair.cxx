@@ -37,8 +37,8 @@
 #include <sk/config/option.hxx>
 #include <sk/config/parse.hxx>
 #include <sk/config/parser/numeric.hxx>
-#include <sk/config/parser/string.hxx>
 #include <sk/config/parser/pair.hxx>
+#include <sk/config/parser/string.hxx>
 
 TEST_CASE("pair<int,std::string>") {
     namespace cfg = sk::config;
@@ -78,4 +78,28 @@ TEST_CASE("pair<int,bool>") {
 
     REQUIRE(get<0>(c.v) == 42);
     REQUIRE(get<1>(c.v) == true);
+}
+
+TEST_CASE("pair<int,double> from tuple parser") {
+    namespace cfg = sk::config;
+    namespace x3 = boost::spirit::x3;
+
+    struct test_config {
+        std::pair<int, double> v;
+    };
+
+    auto grammar =                //
+        cfg::config<test_config>( //
+            cfg::option("v", &test_config::v,
+                x3::int_ > '/' > x3::double_));
+
+    test_config c;
+    try {
+        cfg::parse("v 42/1.5;", grammar, c);
+    } catch (sk::config::parse_error const &e) {
+        std::cerr << e;
+    }
+
+    REQUIRE(get<0>(c.v) == 42);
+    REQUIRE(get<1>(c.v) == Approx(1.5));
 }

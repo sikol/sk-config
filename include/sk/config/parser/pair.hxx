@@ -53,7 +53,14 @@ namespace sk::config {
                              std::pair<T1, T2> &from) {
             to = std::move(from);
         }
-
+        #if 0
+        // pair<T1,T2> <- tuple<T1,T2>
+        template <typename T1, typename T2>
+        void propagate_value(auto & /*ctx*/, std::pair<T1, T2> &to,
+                             std::tuple<T1, T2> &from) {
+            to = std::move(from);
+        }
+        #endif
     } // namespace detail
 
 } // namespace sk::config

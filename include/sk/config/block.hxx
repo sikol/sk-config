@@ -45,8 +45,10 @@ namespace sk::config {
      * block(label, members...): parse a block with the given label which
      * contains the members.
      */
-    template <typename U, typename T, typename V, typename... Members>
-    auto block(auto label, V T::*mm, Members &&...members) {
+    template <typename BlockType, typename ParentType, typename ParentValueType,
+              typename... Members>
+    auto block(auto label, ParentValueType ParentType::*mm,
+               Members &&...members) {
         namespace x3 = boost::spirit::x3;
 
         auto member_parser = *(... | std::forward<Members>(members));
@@ -57,12 +59,13 @@ namespace sk::config {
         auto parser = x3::as_parser(label)            //
                       > -(braced_members[do_nothing]) //
                       > x3::no_skip[detail::parser::option_terminator];
-        return detail::rule<U>(label, parser)[detail::propagate(mm)];
+        return detail::rule<BlockType>(label, parser)[detail::propagate(mm)];
     }
 
-    template <typename U, typename W, typename T, typename V,
-              typename... Members>
-    auto block(auto label, W U::*name, V T::*mm, Members &&...members) {
+    template <typename BlockType, typename NameType, typename ParentType,
+              typename ParentValueType, typename... Members>
+    auto block(auto label, NameType BlockType::*name,
+               ParentValueType ParentType::*mm, Members &&...members) {
         namespace x3 = boost::spirit::x3;
 
         auto member_parser = *(... | std::forward<Members>(members));
@@ -73,8 +76,8 @@ namespace sk::config {
                       > detail::make_member_parser(name) //
                       > -(braced_members[do_nothing])    //
                       > x3::no_skip[detail::parser::option_terminator];
-        return detail::rule<U>(label,
-                               parser)[detail::propagate_named(mm, name)];
+        return detail::rule<BlockType>(
+            label, parser)[detail::propagate_named(mm, name)];
     }
 
 } // namespace sk::config

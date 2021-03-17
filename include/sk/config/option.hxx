@@ -49,7 +49,8 @@ namespace sk::config {
                > x3::no_skip[detail::parser::option_terminator];
     }
 
-    template <typename T, typename V> auto option(auto label, V T::*member) {
+    template <typename T, typename V>
+    auto option(auto label, V T::*member) {
         namespace x3 = boost::spirit::x3;
 
         if constexpr (std::same_as<bool, V>) {
