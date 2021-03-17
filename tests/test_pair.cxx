@@ -26,29 +26,56 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_HXX_INCLUDED
-#define SK_CONFIG_HXX_INCLUDED
+#include <catch.hpp>
 
-// Include all supported parser types.
+#include <cstring>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
-#include <sk/config/parser/deque.hxx>
-#include <sk/config/parser/list.hxx>
-#include <sk/config/parser/map.hxx>
-#include <sk/config/parser/numeric.hxx>
-#include <sk/config/parser/pair.hxx>
-#include <sk/config/parser/set.hxx>
-#include <sk/config/parser/string.hxx>
-#include <sk/config/parser/tuple.hxx>
-#include <sk/config/parser/unordered_set.hxx>
-#include <sk/config/parser/unordered_map.hxx>
-#include <sk/config/parser/variant.hxx>
-#include <sk/config/parser/vector.hxx>
-
-#include <sk/config/option.hxx>
-#include <sk/config/block.hxx>
 #include <sk/config/config.hxx>
+#include <sk/config/option.hxx>
+#include <sk/config/parse.hxx>
+#include <sk/config/parser/numeric.hxx>
+#include <sk/config/parser/string.hxx>
+#include <sk/config/parser/pair.hxx>
 
-#include <sk/config/parse.hxx> 
+TEST_CASE("pair<int,std::string>") {
+    namespace cfg = sk::config;
 
+    struct test_config {
+        std::pair<int, std::string> v;
+    };
 
-#endif // SK_CONFIG_HXX_INCLUDED
+    auto grammar = cfg::config<test_config>(cfg::option("v", &test_config::v));
+
+    test_config c;
+    try {
+        cfg::parse("v 42, 'test string';", grammar, c);
+    } catch (sk::config::parse_error const &e) {
+        std::cerr << e;
+    }
+
+    REQUIRE(get<0>(c.v) == 42);
+    REQUIRE(get<1>(c.v) == "test string");
+}
+
+TEST_CASE("pair<int,bool>") {
+    namespace cfg = sk::config;
+
+    struct test_config {
+        std::pair<int, bool> v;
+    };
+
+    auto grammar = cfg::config<test_config>(cfg::option("v", &test_config::v));
+
+    test_config c;
+    try {
+        cfg::parse("v 42, true;", grammar, c);
+    } catch (sk::config::parse_error const &e) {
+        std::cerr << e;
+    }
+
+    REQUIRE(get<0>(c.v) == 42);
+    REQUIRE(get<1>(c.v) == true);
+}

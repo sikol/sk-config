@@ -41,7 +41,7 @@ add_executable(test_sk_config
 	test_custom_option.cxx
 	test_symbols.cxx
 	test_parser_policy.cxx
- "test_map.cxx" "test_unordered_map.cxx")
+ "test_map.cxx" "test_unordered_map.cxx" "test_pair.cxx")
 
 target_link_libraries(test_sk_config PRIVATE sk-config Catch2::Catch2)
 

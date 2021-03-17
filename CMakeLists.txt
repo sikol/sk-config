@@ -77,7 +77,7 @@ target_sources(sk-config PRIVATE
 	include/sk/config/option.hxx
 	include/sk/config/parser_policy.hxx
 	include/sk/config.hxx
-  "include/sk/config/parser/map.hxx" "include/sk/config/parser/unordered_map.hxx")
+  "include/sk/config/parser/map.hxx" "include/sk/config/parser/unordered_map.hxx" "include/sk/config/detail/parser/pair.hxx" "include/sk/config/parser/pair.hxx")
 
 target_include_directories(sk-config INTERFACE include)
 

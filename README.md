@@ -186,23 +186,6 @@ Core functionality:
 * `<sk/config/config.hxx>` - `config()` function
 * `<sk/config/parser_policy.hxx>` - `parser_policy` type
 
-Basic parsers:
-
-* `<sk/config/parser/numeric.hxx>` - integral and floating point parsers
-* `<sk/config/parser/string.hxx>` - `std::basic_string` parser
-
-Standard container parsers:
-
-* `<sk/config/parser/deque.hxx>`
-* `<sk/config/parser/list.hxx>`
-* `<sk/config/parser/set.hxx>`
-* `<sk/config/parser/tuple.hxx>`
-* `<sk/config/parser/unordered_set.hxx>`
-* `<sk/config/parser/variant.hxx>`
-* `<sk/config/parser/vector.hxx>`
-* `<sk/config/parser/map.hxx>`
-* `<sk/config/parser/unordered_map.hxx>`
-
 ## Supported types
 
 `sk-config` requires a parser for each type used in the configuration file.
@@ -216,6 +199,8 @@ are known.
 
 ### Integers
 
+* Include `<sk/config/parser/numeric.hxx>`
+
 Any type that meets the requirements of `std::integral` is parsed using the
 standard Spirit integer parser.  Numbers must be in base 10, and base prefixes
 (`0x`, `0`) are not supported. 
@@ -225,6 +210,8 @@ Examples:
 * `opt -42;`
 
 ### Real numbers
+
+* Include `<sk/config/parser/numeric.hxx>`
 
 Any type that meets the requirements of `std::floating_point` is parsed using
 the standard Spirit real number parser.  Leading and trailing dots are both
@@ -236,6 +223,8 @@ Examples:
 * `opt 2;`
 
 ### Booleans
+
+* Include `<sk/config/parser/numeric.hxx>`
 
 When used as a bare type, `bool` is parsed differently from other types
 since it has no value; instead, specifying the option is treated as `true`.
@@ -250,6 +239,8 @@ Example:
 * `my-option 42, true; # std::tuple<int,bool>`
 
 ### Strings
+
+* Include `<sk/config/parser/string.hxx>`
 
 `std::basic_string` can be parsed in three ways:
 
@@ -274,6 +265,12 @@ END;
 ```
 
 ### Lists
+
+* Include `<sk/config/parser/deque.hxx>`
+* Include `<sk/config/parser/list.hxx>`
+* Include `<sk/config/parser/set.hxx>`
+* Include `<sk/config/parser/unordered_set.hxx>`
+* Include `<sk/config/parser/vector.hxx>`
 
 Most standard container types can be parsed as lists.  Two list styles are
 supported: inline (comma-separated) and braced.
@@ -328,12 +325,17 @@ struct no_inline_lists : sk::config::parser_policy {
 
 ### Maps
 
+* Include `<sk/config/parser/map.hxx>`
+* Include `<sk/config/parser/unordered_map.hxx>`
+
 `std::map<T,U>` and `std::unordered_map<T,U>` are supported for named blocks
 (only), where `T` is the type of the block's name, and `U` is the type of
 the block.  The values will be inserted into the map using the block name
 as the key; duplicate keys will raise an error.
 
 ### std::variant
+
+* Include `<sk/config/parser/variant.hxx>`
 
 `std::variant<Ts...>` is parsed as a single value.  All types in `Ts`
 must be supported types.
@@ -342,10 +344,13 @@ Due to a quirk of the parser, `Ts` should not contain both integral and
 floating-point types (for example, `variant<int,float>`) or parsing will
 not working correctly.
 
-### std::tuple
+### std::tuple, std::pair
 
-`std::tuple<Ts...>` is parsed as a comma-separated list of its contained
-types.  All types in `Ts` must be supported types.
+* Include `<sk/config/parser/pair.hxx>`
+* Include `<sk/config/parser/tuple.hxx>`
+
+`std::tuple<Ts...>` and `std::pair<T1,T2>` are parsed as a comma-separated
+list of their contained types.  All types in `Ts` must be supported types.
 
 ### Custom parsers
 

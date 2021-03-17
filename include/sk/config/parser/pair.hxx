@@ -26,29 +26,36 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_HXX_INCLUDED
-#define SK_CONFIG_HXX_INCLUDED
+#ifndef SK_CONFIG_PARSER_PAIR_HXX_INCLUDED
+#define SK_CONFIG_PARSER_PAIR_HXX_INCLUDED
 
-// Include all supported parser types.
+#include <utility>
 
-#include <sk/config/parser/deque.hxx>
-#include <sk/config/parser/list.hxx>
-#include <sk/config/parser/map.hxx>
-#include <sk/config/parser/numeric.hxx>
-#include <sk/config/parser/pair.hxx>
-#include <sk/config/parser/set.hxx>
-#include <sk/config/parser/string.hxx>
-#include <sk/config/parser/tuple.hxx>
-#include <sk/config/parser/unordered_set.hxx>
-#include <sk/config/parser/unordered_map.hxx>
-#include <sk/config/parser/variant.hxx>
-#include <sk/config/parser/vector.hxx>
+#include <sk/config/detail/parser/pair.hxx>
+#include <sk/config/parser_for.hxx>
 
-#include <sk/config/option.hxx>
-#include <sk/config/block.hxx>
-#include <sk/config/config.hxx>
+namespace sk::config {
 
-#include <sk/config/parse.hxx> 
+    template <typename T1, typename T2>
+    struct parser_for<std::pair<T1, T2>> {
+        using parser_type =
+            detail::parser::pair<typename parser_for<T1>::parser_type,
+                                 typename parser_for<T2>::parser_type>;
+        using rule_type = std::pair<T1, T2>;
+        static constexpr char const name[] = "exactly two values";
+    };
 
+    namespace detail {
 
-#endif // SK_CONFIG_HXX_INCLUDED
+        // pair<T1,T2> <- pair<T1,T2>
+        template <typename T1, typename T2>
+        void propagate_value(auto & /*ctx*/, std::pair<T1, T2> &to,
+                             std::pair<T1, T2> &from) {
+            to = std::move(from);
+        }
+
+    } // namespace detail
+
+} // namespace sk::config
+
+#endif // SK_CONFIG_PARSER_PAIR_HXX_INCLUDED

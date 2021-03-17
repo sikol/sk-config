@@ -36,7 +36,8 @@
 
 namespace sk::config {
 
-    template <typename T> struct parser_for<std::vector<T>> {
+    template <typename T>
+    struct parser_for<std::vector<T>> {
         using parser_type =
             detail::parser::vector<typename parser_for<T>::parser_type>;
         using rule_type = std::vector<T>;

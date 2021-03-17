@@ -3,4 +3,5 @@ BasedOnStyle: LLVM
 IndentWidth: '4'
 NamespaceIndentation: All
 AllowShortFunctionsOnASingleLine: Empty
+AlwaysBreakTemplateDeclarations: Yes
 ---
