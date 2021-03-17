@@ -1,5 +1,5 @@
-``std::map<>``
-==============
+``std::map<>``, ``std::unordered_map<>``
+========================================
 
 * Include ``<sk/config.hxx>`` or one or more of the following:
     * ``<sk/config/parser/map.hxx>``

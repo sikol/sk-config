@@ -3,10 +3,9 @@
 
 * Include ``<sk/config/parser/pair.hxx>`` or ``<sk/config.hxx>``.
 
-``std::pair<T1,T2>`` is parsed as an inline or bracted list of values.
-The list must have expected two values.  Both ``T1`` and ``T2`` must be
-supported types.
-
+``std::pair<T1,T2>`` is parsed as an inline or braced list of values
+(see :ref:`lists`).  The list must have exactly two values.  Both 
+``T1`` and ``T2`` must be supported types.
 
 Example:
 

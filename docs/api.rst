@@ -134,6 +134,8 @@ Create a named block:
 ``option<T>()``
 ---------------
 
+* **Defined in**: ``<sk/config/option.hxx>`` or ``<sk/config.hxx>``.
+
 **Prototype**:
 
 .. code-block:: c++
@@ -161,3 +163,80 @@ Create a named block:
   ``std::vector<ValueType>`` (for an option that can be specified multiple
   times), etc.  
 * ``p``: The parser that will be used to parse the option's value.
+
+``parse()``
+-----------
+
+* **Defined in**: ``<sk/config/parse.hxx>`` or ``<sk/config.hxx>``.
+
+**Prototype**:
+
+.. code-block:: c++
+
+    template <typename Policy = parser_policy, typename Iterator>
+    bool parse(Iterator first, 
+               Iterator last,
+               auto const &grammar, 
+               auto &ret,
+               std::string const &filename = "");
+
+    template <typename Policy = parser_policy>
+    bool parse(std::ranges::range auto const &range, 
+               auto const &grammar, 
+               auto &ret,
+               std::string const &filename = "");
+
+    template <typename Policy = parser_policy>
+    bool parse(char const *string, 
+               auto const &grammar, 
+               auto &ret,
+               std::string const &filename = "");
+
+**Description**
+
+Parse a configuration string and return the loaded configuration.
+
+**Arguments**
+
+* ``first``, ``last``: An iterator pair containing the configuration
+  string; the iterator's value should be a char-like type.
+* ``range``: An `std::ranges::range`` containing the configuration
+  string; the range's value should be a char-like type.
+* ``string``: A nul-terminated C string containing the configuration.
+* ``grammar``: The grammar that will be used to parse the configuration.
+* ``ret``: Reference to the top-level configuration object which will
+  be populated with the configuration data.
+* ``filename``: The name of the file which the configuration was
+  loaded from; this is used in error messages.
+
+**Return value**
+
+``parse()`` always returns ``true``.
+
+``parse_file()``
+----------------
+
+* **Defined in**: ``<sk/config/parse.hxx>`` or ``<sk/config.hxx>``.
+
+**Prototype**:
+
+.. code-block:: c++
+    template <typename Policy = parser_policy>
+    bool parse_file(std::filesystem::path filename,
+                    auto const &grammar,
+                    auto &ret);
+
+**Description**
+
+Parse a configuration file and return the loaded configuration.
+
+**Arguments**
+
+* ``filename``: Name of a configuration file that will be parsed.
+* ``grammar``: The grammar that will be used to parse the configuration.
+* ``ret``: Reference to the top-level configuration object which will
+  be populated with the configuration data.
+
+**Return value**
+
+``parse()`` always returns ``true``.
