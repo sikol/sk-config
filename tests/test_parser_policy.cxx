@@ -151,3 +151,42 @@ TEST_CASE("parser_policy::allow_inline_lists") {
     REQUIRE_THROWS(
         (cfg::parse<no_inline_lists>(R"(v 1, 42, 666;)", grammar, c)));
 }
+
+struct square_braced : sk::config::parser_policy {
+    auto braced(auto const &p) const {
+        return '[' > p > ']';
+    }
+};
+
+TEST_CASE("parser_policy::braced()") {
+    namespace cfg = sk::config;
+
+    struct test_block {
+        int a, b;
+    };
+
+    struct test_config {
+        test_block b;
+    };
+
+    auto grammar = cfg::config<test_config>(                     //
+        cfg::block<test_block>("test-block", &test_config::b,    //
+                               cfg::option("a", &test_block::a), //
+                               cfg::option("b", &test_block::b)));
+
+    test_config c;
+    try {
+        cfg::parse<square_braced>(R"(
+test-block [
+    a 42;
+    b 666;
+];
+)",
+                                   grammar, c);
+    } catch (cfg::parse_error const &e) {
+        std::cout << e;
+    }
+
+    REQUIRE(c.b.a == 42);
+    REQUIRE(c.b.b == 666);
+}

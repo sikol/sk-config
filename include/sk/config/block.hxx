@@ -34,6 +34,7 @@
 #include <boost/spirit/home/x3.hpp>
 
 #include <sk/config/detail/make_member_parser.hxx>
+#include <sk/config/detail/parser/braced.hxx>
 #include <sk/config/detail/parser/option_terminator.hxx>
 #include <sk/config/detail/propagate.hxx>
 #include <sk/config/detail/rule.hxx>
@@ -49,12 +50,12 @@ namespace sk::config {
         namespace x3 = boost::spirit::x3;
 
         auto member_parser = *(... | std::forward<Members>(members));
+        auto braced_members = detail::parser::braced_parser(member_parser);
 
         auto do_nothing = [&](auto &) {};
+
         auto parser = x3::as_parser(label)            //
-                      > -('{'                         //
-                          > member_parser[do_nothing] //
-                          > '}')                      //
+                      > -(braced_members[do_nothing]) //
                       > x3::no_skip[detail::parser::option_terminator];
         return detail::rule<U>(label, parser)[detail::propagate(mm)];
     }
@@ -65,15 +66,15 @@ namespace sk::config {
         namespace x3 = boost::spirit::x3;
 
         auto member_parser = *(... | std::forward<Members>(members));
+        auto braced_members = detail::parser::braced_parser(member_parser);
 
         auto do_nothing = [&](auto &) {};
         auto parser = x3::as_parser(label)               //
                       > detail::make_member_parser(name) //
-                      > -('{'                            //
-                          > member_parser[do_nothing]    //
-                          > '}')                         //
+                      > -(braced_members[do_nothing])    //
                       > x3::no_skip[detail::parser::option_terminator];
-        return detail::rule<U>(label, parser)[detail::propagate_named(mm, name)];
+        return detail::rule<U>(label,
+                               parser)[detail::propagate_named(mm, name)];
     }
 
 } // namespace sk::config

@@ -61,6 +61,13 @@ namespace sk::config {
 
         // Whether to accept braced lists, { val; val; val...; }
         static constexpr bool allow_braced_lists = true;
+
+        /*
+         * The parser to confix a braced element.
+         */
+        static constexpr auto braced(auto const& v) {
+            return '{' > v > '}';
+        }
     };
 
 }; // namespace sk::config

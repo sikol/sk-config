@@ -172,6 +172,9 @@ user "fred" {
 }
 ```
 
+See [parse_policy.hxx](include/sk/config/parser_policy.hxx) for other
+supported parser policies.
+
 ## Include files
 
 The easiest way to use the library is to include `<sk/config.hxx>`, which
