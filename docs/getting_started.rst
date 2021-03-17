@@ -4,7 +4,7 @@ Getting started
 Before you can parse a configuration file, you need to define the
 C++ types that will store the loaded configuration.  These are
 normal structs (or classes) with a member field for each configuration
-option.  Most common types are supported (see `:ref:types`) and
+option.  Most common types are supported (see :ref:`types`) and
 if needed, support for additional types can be added.
 
 Our sample configuration file will look like this:
