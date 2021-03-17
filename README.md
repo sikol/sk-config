@@ -172,7 +172,7 @@ user "fred" {
 }
 ```
 
-See [parse_policy.hxx](include/sk/config/parser_policy.hxx) for other
+See [parser_policy.hxx](include/sk/config/parser_policy.hxx) for other
 supported parser policies.
 
 ## Include files

@@ -153,7 +153,7 @@ TEST_CASE("parser_policy::allow_inline_lists") {
 }
 
 struct square_braced : sk::config::parser_policy {
-    auto braced(auto const &p) const {
+    static constexpr auto braced(auto const &p) {
         return '[' > p > ']';
     }
 };
