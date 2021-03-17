@@ -75,7 +75,7 @@ namespace sk::config {
                     auto it = x3::_where(ctx).begin();
                     boost::throw_exception(
                         x3::expectation_failure<decltype(it)>(it,
-                                                              "unique value"));
+                                                              "a block"));
                 }
             }
         }
