@@ -26,6 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+// Disable unhelpful MSVC warnings.
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <cstdio>
@@ -42,8 +43,6 @@
 
 #include <sk/config.hxx>
 
-#include <boost/spirit/home/x3/support/utility/annotate_on_success.hpp>
-
 struct user {
     int uid, gid;
     std::string username;
@@ -56,8 +55,8 @@ struct group {
 };
 
 struct config {
-    std::vector<user> users;
-    std::vector<group> groups;
+    std::map<std::string, user> users;
+    std::map<std::string, group> groups;
 };
 
 int main(int argc, char **argv) {
@@ -92,12 +91,12 @@ int main(int argc, char **argv) {
 
     fmt::print("users:\n");
 
-    for (auto &&user : loaded_config.users)
+    for (auto &&[_, user] : loaded_config.users)
         fmt::print("\t{}: uid={}, gid={}\n", user.username, user.gid, user.gid);
 
     fmt::print("groups:\n");
 
-    for (auto &&group : loaded_config.groups) {
+    for (auto &&[_, group] : loaded_config.groups) {
         fmt::print("\t{}: gid={}, members=", group.name, group.gid);
         std::ranges::copy(group.members,
                           std::ostream_iterator<std::string>(std::cout, " "));

@@ -6,6 +6,7 @@ sk-config: extensible configuration file parser for C++
    :maxdepth: 2
    :caption: Contents:
 
+   getting_started.rst
    file_format.rst
    includes.rst
    types.rst
