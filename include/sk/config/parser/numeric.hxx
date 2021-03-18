@@ -26,8 +26,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SK_CONFIG_PARSER_NUMERIC_HPP
-#define SK_CONFIG_PARSER_NUMERIC_HPP
+#ifndef SK_CONFIG_PARSER_NUMERIC_HXX_INCLUDED
+#define SK_CONFIG_PARSER_NUMERIC_HXX_INCLUDED
 
 #include <concepts>
 
@@ -98,4 +98,4 @@ namespace sk::config {
 
 }; // namespace sk::config
 
-#endif // SK_CONFIG_PARSER_NUMERIC_HPP
+#endif // SK_CONFIG_PARSER_NUMERIC_HXX_INCLUDED

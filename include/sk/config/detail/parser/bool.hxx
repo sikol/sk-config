@@ -39,10 +39,11 @@ namespace sk::config::detail::parser {
         typedef bool attribute_type;
         static bool const has_attribute = true;
 
-        template <typename Iterator, typename Context>
+        template <typename Iterator, typename Context, typename RContext,
+                  typename Attribute>
         bool parse(Iterator &first, Iterator const &last,
-                   Context const &context, boost::spirit::x3::unused_type,
-                   attribute_type &attr) const {
+                   Context const &context, RContext const &rcontext,
+                   Attribute &attr) const {
             namespace x3 = boost::spirit::x3;
 
             static auto const true_ = x3::lit("true");
@@ -50,9 +51,9 @@ namespace sk::config::detail::parser {
 
             x3::unused_type unused_;
 
-            if (true_.parse(first, last, context, unused_, unused_))
+            if (true_.parse(first, last, context, rcontext, unused_))
                 attr = true;
-            else if (false_.parse(first, last, context, unused_, unused_))
+            else if (false_.parse(first, last, context, rcontext, unused_))
                 attr = false;
             else
                 return false;
