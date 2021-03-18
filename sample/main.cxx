@@ -81,6 +81,7 @@ int main(int argc, char **argv) {
     try {
         cfg::parse_file(filename, grammar, loaded_config);
     } catch (cfg::parse_error const &e) {
+        std::cerr << "Could not load the configuration:\n";
         std::cerr << e;
         return 1;
     } catch (std::exception const &e) {

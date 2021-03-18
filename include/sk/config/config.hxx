@@ -50,7 +50,7 @@ namespace sk::config {
         auto member_parser = *(... | std::forward<Members>(members));
 
         auto do_nothing = [&](auto &) {};
-        auto parser = member_parser[do_nothing];
+        auto parser = x3::eps > member_parser[do_nothing] > x3::eoi;
 
         return detail::rule<T>("config", parser);
     }
